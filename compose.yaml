@@ -1,0 +1,14 @@
+# The hearthlane planner as one service: build the image, run the jar, and
+# keep the operational knobs in one place. The token is optional; when it is
+# set the workbench asks for it on the first refusal.
+services:
+  hearthlane:
+    build: .
+    image: hearth-api
+    ports:
+      - "8093:8093"
+    environment:
+      HEARTH_TOKEN: ${HEARTH_TOKEN:-}
+      HEARTH_RATE_LIMIT: ${HEARTH_RATE_LIMIT:-600}
+      HEARTH_MAX_BODY: ${HEARTH_MAX_BODY:-1048576}
+    restart: unless-stopped
