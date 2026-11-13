@@ -15,10 +15,11 @@ public final class PrioritizedSolver {
 
     /**
      * The answer, with the order used and the regions where earlier traffic
-     * pushed later AMRs around. On failure {@code paths} is empty.
+     * pushed later AMRs around. {@code served} counts the AMRs planned before
+     * a failure; on success it equals the manifest size.
      */
     public record Outcome(Map<String, PlanPath> paths, int sum, int makespan, boolean solved, String reason,
-            List<String> order, Map<String, Integer> rejections, int expansions) {}
+            int served, List<String> order, Map<String, Integer> rejections, int expansions) {}
 
     private final PlanInput input;
     private final List<PlanAgent> order;
@@ -51,7 +52,7 @@ public final class PrioritizedSolver {
             if (path == null) {
                 return new Outcome(Map.of(), 0, 0, false,
                         agent.amr() + " cannot reach its goal under the traffic booked ahead of it.",
-                        ids(), Map.copyOf(rejections), expansions);
+                        paths.size(), ids(), Map.copyOf(rejections), expansions);
             }
             table.reserve(path, input.horizon());
             paths.put(agent.id(), path);
@@ -61,7 +62,8 @@ public final class PrioritizedSolver {
         for (PlanPath path : paths.values()) {
             makespan = Math.max(makespan, path.arrival());
         }
-        return new Outcome(Map.copyOf(paths), sum, makespan, true, null, ids(), Map.copyOf(rejections), expansions);
+        return new Outcome(Map.copyOf(paths), sum, makespan, true, null, paths.size(), ids(),
+                Map.copyOf(rejections), expansions);
     }
 
     private List<String> ids() {

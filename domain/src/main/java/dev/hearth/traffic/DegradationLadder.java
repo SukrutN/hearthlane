@@ -10,7 +10,7 @@ import java.util.List;
  */
 public final class DegradationLadder {
 
-    public record Rung(String solver, int sum, Integer gap, int expanded, long micros, boolean solved, String reason) {}
+    public record Rung(String solver, Integer sum, Integer gap, int expanded, long micros, boolean solved, String reason) {}
 
     private DegradationLadder() {}
 
@@ -20,15 +20,15 @@ public final class DegradationLadder {
         ConflictSolver cbs = new ConflictSolver(input, ConflictSolver.Mode.PLAIN);
         ConflictSolver.Solution plain = cbs.solve();
         long micros = microsSince(started);
-        out.add(new Rung("CBS", plain.sum(), plain.solved() ? 0 : null, plain.expanded(), micros,
-                plain.solved(), plain.reason()));
+        out.add(new Rung("CBS", plain.solved() ? plain.sum() : null, plain.solved() ? 0 : null, plain.expanded(),
+                micros, plain.solved(), plain.reason()));
 
         started = System.nanoTime();
         ConflictSolver icbs = new ConflictSolver(input, ConflictSolver.Mode.IMPROVED);
         ConflictSolver.Solution improved = icbs.solve();
         micros = microsSince(started);
-        out.add(new Rung("ICBS", improved.sum(), improved.solved() ? 0 : null, improved.expanded(), micros,
-                improved.solved(), improved.reason()));
+        out.add(new Rung("ICBS", improved.solved() ? improved.sum() : null, improved.solved() ? 0 : null,
+                improved.expanded(), micros, improved.solved(), improved.reason()));
 
         started = System.nanoTime();
         PrioritizedSolver prioritized = new PrioritizedSolver(input);
@@ -38,7 +38,7 @@ public final class DegradationLadder {
         if (greedy.solved() && plain.solved()) {
             gap = greedy.sum() - plain.sum();
         }
-        out.add(new Rung("prioritized", greedy.sum(), gap, greedy.expansions(), micros,
+        out.add(new Rung("prioritized", greedy.solved() ? greedy.sum() : null, gap, greedy.expansions(), micros,
                 greedy.solved(), greedy.reason()));
         return out;
     }
