@@ -36,6 +36,10 @@ public final class HearthJson {
         } catch (Exception e) {
             throw new PlanRejection(List.of("The document is not JSON the planner can read: " + e.getMessage()));
         }
+        return parse(root);
+    }
+
+    public static PlanInput parse(JsonNode root) {
         List<String> reasons = new ArrayList<>();
         if (root == null || !root.isObject()) {
             throw new PlanRejection(List.of("The document must be an object with floor, tasks, horizon, and seed."));

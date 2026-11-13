@@ -17,7 +17,7 @@ public final class PlanLibrary {
         String resource = "fixtures/" + name + ".json";
         InputStream stream = PlanLibrary.class.getClassLoader().getResourceAsStream(resource);
         if (stream == null) {
-            throw new PlanRejection(List.of("No fixture answers to " + name + "; the library carries casting-hall."));
+            throw new UnknownFixture(name);
         }
         try (InputStream source = stream) {
             return HearthJson.parse(new String(source.readAllBytes(), StandardCharsets.UTF_8));

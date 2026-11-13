@@ -1,0 +1,388 @@
+openapi: 3.0.3
+info:
+  title: Hearthline traffic windows
+  version: 1.0.0
+  description: |
+    Plans a fixed set of AMR tasks across one floor, reads the congestion the
+    conflict tree met, and answers window asks through a release gate. Send a
+    published fixture name or an inline floor document. The service does not
+    keep a fleet, an order stream, or a user directory. All floors and figures
+    are fictional worked examples.
+paths:
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: The process is serving.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: up
+  /v1/openapi.yaml:
+    get:
+      operationId: openApi
+      responses:
+        "200":
+          description: This document.
+          content:
+            application/yaml:
+              schema:
+                type: string
+  /v1/plan:
+    post:
+      operationId: plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/FixtureRequest"
+                - $ref: "#/components/schemas/InlineRequest"
+      responses:
+        "200":
+          description: The manifest's reading — ladder, arrivals, density, replications, curve, gate journal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanReport"
+        "400":
+          description: The fixture is unknown or the document cannot be planned.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /v1/windows:
+    post:
+      operationId: windows
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/WindowFixtureRequest"
+                - $ref: "#/components/schemas/WindowInlineRequest"
+      responses:
+        "200":
+          description: The gate's call on the window ask — fire, or hesitate with the journal of why.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GateAnswer"
+        "400":
+          description: The fixture is unknown, the ask is malformed, or the manifest itself cannot be served.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+components:
+  schemas:
+    FixtureRequest:
+      type: object
+      required: [fixture]
+      properties:
+        fixture:
+          type: string
+          example: casting-hall
+    InlineRequest:
+      type: object
+      required: [document]
+      properties:
+        document:
+          type: object
+          description: A floor document — floor, tasks, horizon, seed. See fixtures/casting-hall.json.
+    WindowFixtureRequest:
+      type: object
+      required: [fixture, request]
+      properties:
+        fixture:
+          type: string
+          example: casting-hall
+        request:
+          $ref: "#/components/schemas/WindowAsk"
+    WindowInlineRequest:
+      type: object
+      required: [document, request]
+      properties:
+        document:
+          type: object
+          description: A floor document.
+        request:
+          $ref: "#/components/schemas/WindowAsk"
+    WindowAsk:
+      type: object
+      required: [id, amr, klass, origin, destination, earliest, latest]
+      properties:
+        id:
+          type: string
+          example: W-9
+        amr:
+          type: string
+          example: Kiln
+        klass:
+          type: string
+          enum: [express, standard, bulk]
+        origin:
+          type: array
+          items:
+            type: integer
+          example: [8, 9]
+        destination:
+          type: array
+          items:
+            type: integer
+          example: [0, 9]
+        earliest:
+          type: integer
+        latest:
+          type: integer
+    GateAnswer:
+      type: object
+      required: [floor, request, decision, reasons, verdict]
+      properties:
+        floor:
+          type: string
+        request:
+          type: string
+        decision:
+          type: string
+          enum: [fire, hesitate]
+        reasons:
+          type: array
+          items:
+            type: string
+        verdict:
+          $ref: "#/components/schemas/WindowVerdict"
+    WindowVerdict:
+      type: object
+      required: [granted]
+      properties:
+        granted:
+          type: boolean
+        grant:
+          $ref: "#/components/schemas/WindowGrant"
+        slo:
+          $ref: "#/components/schemas/SloViolation"
+    WindowGrant:
+      type: object
+      required: [amr, depart, arrive, detour, regions]
+      properties:
+        amr:
+          type: string
+        depart:
+          type: integer
+        arrive:
+          type: integer
+        detour:
+          type: integer
+          description: Ticks paid over the straight run.
+        regions:
+          type: array
+          items:
+            type: string
+    SloViolation:
+      type: object
+      required: [amr, reasons]
+      properties:
+        amr:
+          type: string
+        earliestArrival:
+          type: integer
+          nullable: true
+        reasons:
+          type: array
+          items:
+            type: string
+    PlanReport:
+      type: object
+      required: [floorId, floorName, ladder, arrivals, servedSum, makespan, density, replications, curve, windows]
+      properties:
+        floorId:
+          type: string
+        floorName:
+          type: string
+        ladder:
+          type: array
+          items:
+            $ref: "#/components/schemas/Rung"
+        arrivals:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArrivalRow"
+        servedSum:
+          type: integer
+        makespan:
+          type: integer
+        density:
+          type: array
+          items:
+            $ref: "#/components/schemas/DensityRow"
+        replications:
+          $ref: "#/components/schemas/Replications"
+        curve:
+          type: array
+          items:
+            $ref: "#/components/schemas/CurveRow"
+        windows:
+          type: array
+          items:
+            $ref: "#/components/schemas/WindowRow"
+    Rung:
+      type: object
+      required: [solver, gap, expanded, micros, solved]
+      properties:
+        solver:
+          type: string
+          enum: [CBS, ICBS, prioritized]
+        sum:
+          type: integer
+          nullable: true
+        gap:
+          type: integer
+          nullable: true
+        expanded:
+          type: integer
+        micros:
+          type: integer
+        solved:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+    ArrivalRow:
+      type: object
+      required: [id, amr, klass, start, goal, due, arrived]
+      properties:
+        id:
+          type: string
+        amr:
+          type: string
+        klass:
+          type: string
+          enum: [express, standard, bulk]
+        start:
+          type: string
+        goal:
+          type: string
+        due:
+          type: integer
+        arrived:
+          type: integer
+    DensityRow:
+      type: object
+      required: [region, tickFrom, tickTo, splits, cardinal]
+      properties:
+        region:
+          type: string
+        tickFrom:
+          type: integer
+        tickTo:
+          type: integer
+        splits:
+          type: integer
+        cardinal:
+          type: integer
+    Replications:
+      type: object
+      required: [runs, correlation, regions]
+      properties:
+        runs:
+          type: array
+          items:
+            type: object
+            required: [seed, order, sum, solved, rejections]
+            properties:
+              seed:
+                type: integer
+              order:
+                type: array
+                items:
+                  type: string
+              sum:
+                type: integer
+              solved:
+                type: boolean
+              rejections:
+                type: object
+                additionalProperties:
+                  type: integer
+        correlation:
+          type: number
+        regions:
+          type: array
+          items:
+            type: object
+            required: [region, density, meanRejections]
+            properties:
+              region:
+                type: string
+              density:
+                type: integer
+              meanRejections:
+                type: number
+    CurveRow:
+      type: object
+      required: [batch, icbsSolved, icbsSum, prioritizedServed, hitRate]
+      properties:
+        batch:
+          type: integer
+        icbsSolved:
+          type: boolean
+        icbsSum:
+          type: integer
+        prioritizedServed:
+          type: integer
+        hitRate:
+          type: number
+    WindowRow:
+      type: object
+      required: [id, amr, klass, origin, destination, earliest, latest, decision, reasons, verdict]
+      properties:
+        id:
+          type: string
+        amr:
+          type: string
+        klass:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        earliest:
+          type: integer
+        latest:
+          type: integer
+        decision:
+          type: string
+          enum: [fire, hesitate]
+        reasons:
+          type: array
+          items:
+            type: string
+        verdict:
+          $ref: "#/components/schemas/WindowVerdict"
+    Problem:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        reasons:
+          type: array
+          items:
+            type: string
