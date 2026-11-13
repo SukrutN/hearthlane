@@ -1,0 +1,32 @@
+{
+  "floor": {
+    "id": "casting-hall",
+    "name": "Ferro & Lume casting hall",
+    "width": 12,
+    "height": 9,
+    "runs": [
+      { "region": "North Run", "row": 0, "from": 0, "to": 11 },
+      { "region": "Main Run", "row": 3, "from": 0, "to": 11 },
+      { "region": "South Run", "row": 6, "from": 0, "to": 11 },
+      { "region": "Dispatch Apron", "row": 8, "from": 0, "to": 11 },
+      { "region": "West Aisle", "col": 0, "from": 1, "to": 7 },
+      { "region": "Aisle Two", "col": 3, "from": 1, "to": 7 },
+      { "region": "Aisle Three", "col": 6, "from": 1, "to": 7 },
+      { "region": "Aisle Four", "col": 9, "from": 1, "to": 7 }
+    ]
+  },
+  "tasks": [
+    { "id": "T-01", "amr": "AMR-1", "klass": "express", "start": [8, 0], "goal": [0, 11], "due": 22 },
+    { "id": "T-02", "amr": "AMR-2", "klass": "standard", "start": [0, 0], "goal": [8, 11], "due": 25 },
+    { "id": "T-03", "amr": "AMR-3", "klass": "standard", "start": [3, 5], "goal": [3, 0], "due": 9 },
+    { "id": "T-04", "amr": "AMR-4", "klass": "bulk", "start": [6, 9], "goal": [6, 0], "due": 14 },
+    { "id": "T-05", "amr": "AMR-5", "klass": "express", "start": [0, 3], "goal": [8, 3], "due": 11 },
+    { "id": "T-06", "amr": "AMR-6", "klass": "bulk", "start": [8, 6], "goal": [0, 6], "due": 15 }
+  ],
+  "horizon": 30,
+  "seed": 2027,
+  "windows": [
+    { "id": "W-1", "amr": "AMR-7", "klass": "express", "origin": [8, 9], "destination": [0, 9], "earliest": 0, "latest": 25 },
+    { "id": "W-2", "amr": "AMR-8", "klass": "standard", "origin": [3, 7], "destination": [3, 10], "earliest": 4, "latest": 20 }
+  ]
+}
