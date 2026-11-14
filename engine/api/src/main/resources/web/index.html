@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearthlane · traffic workbench</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2028%2028'%3E%3Crect%20x='1'%20y='1'%20width='26'%20height='26'%20fill='none'%20stroke='%23221531'%20stroke-width='2'/%3E%3Crect%20x='6'%20y='6'%20width='6'%20height='16'%20fill='%23221531'/%3E%3Crect%20x='16'%20y='6'%20width='6'%20height='16'%20fill='%23ff36a8'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --paper: #f8eef7;
+    --card: #fffafe;
+    --ink: #221531;
+    --smoke: #6d5f7e;
+    --silver: #6d5f7e;
+    --signal: #ff36a8;
+    --ember: #c40f86;
+    --deep: #1d1230;
+    --rule: rgba(34, 21, 49, 0.14);
+    --rule-soft: rgba(34, 21, 49, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Avenir Next", "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 24px;
+    background: var(--signal);
+    border-bottom: 3px solid var(--ink);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand h1 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand .sub { display: block; font-size: 11px; color: rgba(34, 21, 49, 0.7); letter-spacing: 0.14em; text-transform: uppercase; }
+  .health { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(34, 21, 49, 0.75); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(34, 21, 49, 0.45); flex: none; }
+  .dot.up { background: #1c7511; }
+  .dot.down { background: #c40f31; }
+
+  /* The token slot appears only when the engine refuses without one. */
+  .token-slot { display: flex; align-items: center; gap: 8px; }
+  .token-slot input {
+    width: 160px;
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  .token-slot button {
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--ink);
+    color: var(--paper);
+    font: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
+  .intro { max-width: 760px; margin: 0 0 28px; }
+  .intro p { margin: 6px 0; font-size: 17px; }
+  .intro .lede { color: var(--ink); }
+  .intro .note { color: var(--silver); font-size: 14px; }
+
+  .layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 920px) { .layout { grid-template-columns: 1fr; } }
+
+  aside.panel {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 20px;
+    position: sticky;
+    top: 76px;
+  }
+  @media (max-width: 920px) { aside.panel { position: static; } }
+  aside.panel h2 {
+    margin: 24px 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  aside.panel h2:first-child { margin-top: 0; }
+  aside.panel .hint { margin: 0 0 12px; font-size: 13px; color: var(--silver); }
+
+  label { display: block; font-size: 12px; color: var(--silver); margin: 10px 0 4px; }
+  select, input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+  }
+  textarea { min-height: 120px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+  select:focus, input:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
+
+  .btn {
+    display: inline-block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--ink);
+    color: var(--paper);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn:hover:not(:disabled) { background: var(--deep); border-color: var(--deep); }
+  .btn:disabled { opacity: 0.55; cursor: wait; }
+  .btn--ghost { background: transparent; color: var(--ink); }
+  .btn--ghost:hover:not(:disabled) { background: rgba(34, 21, 49, 0.06); }
+
+  .ask-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .ask-grid .wide { grid-column: 1 / -1; }
+
+  details.paste { margin-top: 18px; border-top: 1px solid var(--rule-soft); padding-top: 14px; }
+  details.paste summary { cursor: pointer; font-size: 13px; color: var(--silver); }
+  details.paste summary:hover { color: var(--ink); }
+
+  #results section { scroll-margin-top: 84px; }
+  .empty {
+    border: 1px dashed var(--rule);
+    border-radius: 2px;
+    padding: 40px 24px;
+    color: var(--silver);
+    font-size: 14px;
+    text-align: center;
+  }
+  .error {
+    display: none;
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border: 1px solid rgba(196, 15, 49, 0.4);
+    border-left: 4px solid #c40f31;
+    border-radius: 2px;
+    background: rgba(196, 15, 49, 0.05);
+  }
+  .error.show { display: block; }
+  .error .title { font-weight: 600; margin: 0 0 4px; }
+  .error ul { margin: 6px 0 0; padding-left: 20px; font-size: 13px; color: var(--smoke); }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 2px; padding: 14px 16px; }
+  .card .k { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--silver); }
+  .card .v { margin-top: 4px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .card .s { margin-top: 2px; font-size: 12px; color: var(--silver); }
+
+  .block { margin: 28px 0; }
+  .block h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  .block .blurb { margin: 0 0 12px; font-size: 13px; color: var(--silver); max-width: 640px; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 2px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--rule-soft); white-space: nowrap; }
+  th { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--silver); font-weight: 600; border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.late td { background: rgba(255, 54, 168, 0.07); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td .sub { display: block; font-size: 11px; color: var(--silver); margin-top: 2px; }
+
+  .chip {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+  .chip--fire { color: var(--signal); border-color: rgba(255, 54, 168, 0.5); background: rgba(255, 54, 168, 0.1); }
+  .chip--hesitate { color: var(--ember); border-color: rgba(196, 15, 134, 0.5); background: rgba(196, 15, 134, 0.08); }
+  .chip--ok { color: #1c7511; border-color: rgba(28, 117, 17, 0.5); background: rgba(28, 117, 17, 0.08); }
+  .chip--bad { color: #c40f31; border-color: rgba(196, 15, 49, 0.5); background: rgba(196, 15, 49, 0.07); }
+
+  .heat { border: 1px solid var(--rule); border-radius: 2px; background: var(--card); overflow-x: auto; }
+  .heat table { border-collapse: separate; border-spacing: 3px; padding: 6px; }
+  .heat th { border-bottom: none; padding: 4px 8px; }
+  .heat td.region { font-size: 12px; color: var(--ink); white-space: nowrap; padding: 6px 10px 6px 4px; }
+  .heat td.cell {
+    min-width: 52px;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    border-radius: 2px;
+    background: rgba(34, 21, 49, 0.04);
+    color: var(--silver);
+    position: relative;
+  }
+  .heat td.cell.hot { color: var(--paper); }
+  .heat td.cell .card3 {
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    background: var(--ember);
+    color: #fff;
+  }
+  .heat-note { margin: 8px 0 0; font-size: 12px; color: var(--silver); }
+
+  .scatter { border: 1px solid var(--rule); border-radius: 2px; background: var(--card); padding: 12px; }
+  .scatter svg { display: block; width: 100%; height: auto; }
+  .scatter .cap { margin: 8px 2px 0; font-size: 12px; color: var(--silver); }
+
+  .bar-track { display: inline-block; width: 90px; height: 8px; margin-left: 8px; background: rgba(34, 21, 49, 0.08); border-radius: 1px; vertical-align: middle; }
+  .bar-fill { display: block; height: 100%; background: var(--signal); border-radius: 1px; }
+
+  .ask-card { background: var(--card); border: 1px solid var(--rule); border-radius: 2px; padding: 18px 20px; }
+  .ask-card .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ask-card .head .who { font-size: 16px; font-weight: 600; }
+  .ask-card ul.reasons { margin: 10px 0 0; padding-left: 20px; font-size: 13px; color: var(--smoke); }
+  .ask-card .verdict { margin-top: 10px; font-size: 14px; }
+
+  footer.site {
+    border-top: 1px solid var(--rule);
+    padding: 20px 24px 32px;
+    font-size: 12px;
+    color: var(--silver);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <rect x="1" y="1" width="26" height="26" stroke="#221531" stroke-width="2"/>
+      <rect x="6" y="6" width="6" height="16" fill="#221531"/>
+      <rect x="16" y="6" width="6" height="16" fill="#fff0fa"/>
+    </svg>
+    <div>
+      <h1>Hearthlane</h1>
+      <span class="sub">traffic workbench</span>
+    </div>
+  </div>
+  <div class="health" id="healthWrap">
+    <span class="dot" id="healthDot"></span>
+    <span id="healthText">checking the engine</span>
+  </div>
+  <div class="token-slot" id="tokenSlot" hidden>
+    <label for="token" style="font-size:12px;color:var(--silver)">Engine token</label>
+    <input type="password" id="token" autocomplete="off" placeholder="paste the token">
+    <button type="button" id="tokenUse">Unlock</button>
+  </div>
+</header>
+
+<main>
+  <div class="intro">
+    <p class="lede">This workbench calls the Hearthlane planner over its published HTTP interface. Plan the casting hall, read what the solvers found, and ask the release gate about a window.</p>
+    <p class="note">Every figure on this page comes from the engine. The hall, the robots, and the runs are a fictional worked example.</p>
+  </div>
+
+  <div class="layout">
+    <aside class="panel">
+      <h2>Watch the floor</h2>
+      <p class="hint">Observations name where each AMR actually stood. The monitor compares them with the plan, names every disagreement, and repairs from where the robots now stand.</p>
+      <label for="obsPaste">Observations (one per line: id, tick, row, col)</label>
+      <textarea id="obsPaste" spellcheck="false" style="min-height:70px" placeholder="T-03 8 3 5"></textarea>
+      <button class="btn" id="watchBtn" type="button">Watch the floor</button>
+      <div id="watchReport" hidden style="margin-top:12px"></div>
+
+      <h2>Plan a floor</h2>
+      <p class="hint">Choose a published floor and plan it. The ladder, the congestion map, and the gate journal will render on the right.</p>
+      <label for="floor">Published floor</label>
+      <select id="floor"></select>
+      <button class="btn" id="planBtn" type="button">Plan the floor</button>
+
+      <details class="paste">
+        <summary>Plan a pasted floor document instead</summary>
+        <label for="docPaste" style="margin-top:12px">Floor document (JSON)</label>
+        <textarea id="docPaste" spellcheck="false" placeholder='{"floor": {...}, "tasks": [...], "horizon": 30, "seed": 2027, "windows": [...]}'></textarea>
+        <button class="btn btn--ghost" id="docBtn" type="button">Plan the pasted document</button>
+      </details>
+
+      <h2>Ask the gate</h2>
+      <p class="hint">A window ask is answered from the served plan. The gate fires the departure or holds it with the reason recorded.</p>
+      <div class="ask-grid">
+        <div class="wide">
+          <label for="wId">Ask id</label>
+          <input type="text" id="wId" value="W-9">
+        </div>
+        <div>
+          <label for="wAmr">Robot (amr)</label>
+          <input type="text" id="wAmr" value="AMR-7">
+        </div>
+        <div>
+          <label for="wClass">Class</label>
+          <select id="wClass">
+            <option value="express">express</option>
+            <option value="standard">standard</option>
+            <option value="bulk">bulk</option>
+          </select>
+        </div>
+        <div>
+          <label for="wOr">Origin row</label>
+          <input type="number" id="wOr" value="8">
+        </div>
+        <div>
+          <label for="wOc">Origin column</label>
+          <input type="number" id="wOc" value="9">
+        </div>
+        <div>
+          <label for="wDr">Destination row</label>
+          <input type="number" id="wDr" value="0">
+        </div>
+        <div>
+          <label for="wDc">Destination column</label>
+          <input type="number" id="wDc" value="9">
+        </div>
+        <div>
+          <label for="wEarly">Earliest tick</label>
+          <input type="number" id="wEarly" value="0">
+        </div>
+        <div>
+          <label for="wLate">Latest tick</label>
+          <input type="number" id="wLate" value="25">
+        </div>
+      </div>
+      <button class="btn" id="gateBtn" type="button">Ask the gate</button>
+    </aside>
+
+    <section id="results">
+      <div class="error" id="error" role="alert"></div>
+      <div class="empty" id="empty">
+        No floor is planned yet. Choose a published floor and plan it, or paste a floor document.
+        The ladder, the congestion map, the deadline curve, and the gate journal will render here.
+      </div>
+      <div id="report" hidden></div>
+      <section class="block" id="askBlock" hidden>
+        <h2>Your window ask</h2>
+        <p class="blurb">The gate's call on the ask you sent, with the reasons it recorded.</p>
+        <div class="ask-card" id="askCard"></div>
+      </section>
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <p>Hearthlane plans a fictional casting hall. The planner and its figures are real. Built by Sukrut Nadigotti.</p>
+</footer>
+
+<script>
+"use strict";
+
+// Everything the page renders passes through esc(), so a document string can
+// never become markup. No template reaches innerHTML unescaped.
+function esc(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function num(value) {
+  return Number(value).toLocaleString("en-US");
+}
+
+function ms(micros) {
+  return (micros / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 }) + " ms";
+}
+
+// A missing figure renders as n/a, never as the word undefined.
+function valueOrNa(value, format) {
+  if (value === null || value === undefined) return "n/a";
+  return format ? format(value) : esc(value);
+}
+
+function setHealth(up, text) {
+  var dot = document.getElementById("healthDot");
+  dot.className = "dot " + (up ? "up" : "down");
+  document.getElementById("healthText").textContent = text;
+}
+
+function busy(button, on, label) {
+  button.disabled = on;
+  button.textContent = on ? label : button.dataset.label;
+}
+
+function clearError() {
+  var box = document.getElementById("error");
+  box.className = "error";
+  box.textContent = "";
+}
+
+function showError(title, reasons) {
+  var box = document.getElementById("error");
+  var list = "";
+  if (reasons && reasons.length) {
+    list = "<ul>" + reasons.map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("") + "</ul>";
+  }
+  box.innerHTML = "<p class='title'>" + esc(title) + "</p>" + list;
+  box.className = "error show";
+}
+
+// Fetch wrapper: network failure marks the engine down, a problem response is
+// returned as an error, and anything that is not JSON fails loudly.
+function call(path, body) {
+  var headers = body ? { "content-type": "application/json" } : undefined;
+  var token = sessionStorage.getItem("hearth-token");
+  if (token) {
+    headers = headers || {};
+    headers.authorization = "Bearer " + token;
+  }
+  return fetch(path, body ? {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(body)
+  } : (headers ? { headers: headers } : undefined)).then(function (response) {
+    setHealth(true, "engine reachable");
+    var retryAfter = response.headers.get("retry-after");
+    var type = response.headers.get("content-type") || "";
+    if (type.includes("application/json")) {
+      return response.json().then(function (json) {
+        if (!response.ok) {
+          throw { problem: json, status: response.status, retryAfter: retryAfter };
+        }
+        return json;
+      });
+    }
+    if (!response.ok) {
+      throw { problem: null, status: response.status, retryAfter: retryAfter };
+    }
+    throw { problem: null, status: 0 };
+  }).catch(function (error) {
+    if (error && error.problem !== undefined) {
+      throw error;
+    }
+    setHealth(false, "engine unreachable");
+    throw { problem: null, status: 0 };
+  });
+}
+
+function reportProblem(state) {
+  if (state && state.status === 401) {
+    document.getElementById("tokenSlot").hidden = false;
+    document.getElementById("token").focus();
+    showError("The engine asks for a token.",
+      ["Paste the engine's token in the header above, then run the request again."]);
+    return;
+  }
+  if (state && state.status === 429 && state.retryAfter) {
+    var rateDetail = state.problem && state.problem.detail
+      ? state.problem.detail
+      : "The engine is limiting this client's requests.";
+    showError("Too many requests. " + rateDetail + " Try again in " + state.retryAfter + " seconds.", []);
+    return;
+  }
+  if (state && state.problem && (state.problem.detail || state.problem.title)) {
+    var detail = state.problem.detail || state.problem.title;
+    // showError escapes once; passing raw text here keeps quotes readable.
+    showError("The engine refused the request. " + detail, state.problem.reasons || []);
+    return;
+  }
+  showError("The engine could not be reached. Check that the hearth-api process is running, then try again.", []);
+}
+
+var lastSource = null;
+
+function plan(source) {
+  lastSource = source;
+  var button = source.fixture
+    ? document.getElementById("planBtn")
+    : document.getElementById("docBtn");
+  clearError();
+  busy(button, true, "Planning the floor...");
+  call("/v1/plan", source).then(function (report) {
+    try {
+      renderReport(report);
+    } catch (renderFailure) {
+      showError("The engine returned a reading this page could not display. The raw response is in the browser console.", []);
+      console.error(renderFailure, report);
+    }
+  }).catch(function (state) {
+    reportProblem(state);
+  }).finally(function () {
+    busy(button, false, null);
+  });
+}
+
+function planDocument() {
+  var text = document.getElementById("docPaste").value.trim();
+  if (!text) {
+    showError("The paste area is empty. Paste a floor document as JSON, or plan a published floor instead.", []);
+    return;
+  }
+  var document_;
+  try {
+    document_ = JSON.parse(text);
+  } catch (parseFailure) {
+    // showError escapes the message once, so the quotes in the parser's
+    // wording stay readable instead of turning into entities.
+    showError("The pasted document is not valid JSON. " + parseFailure.message, []);
+    return;
+  }
+  if (typeof document_ !== "object" || document_ === null || Array.isArray(document_)) {
+    showError("The pasted document must be a JSON object with floor, tasks, horizon, and seed.", []);
+    return;
+  }
+  plan({ document: document_ });
+}
+
+function renderReport(report) {
+  if (!report || typeof report !== "object" || !Array.isArray(report.ladder)) {
+    throw new Error("unexpected report shape");
+  }
+  var reportNode = document.getElementById("report");
+  var emptyNode = document.getElementById("empty");
+  var parts = [];
+
+  parts.push("<p class='note' style='margin:0 0 18px'>Floor: <strong>" + esc(report.floorName || report.floorId || "unnamed") + "</strong></p>");
+
+  var icbs = (report.ladder || []).find(function (r) { return r.solver === "ICBS"; }) || {};
+  var greedy = (report.ladder || []).find(function (r) { return r.solver === "prioritized"; }) || {};
+  parts.push(
+    "<div class='cards'>" +
+    card("Served sum", valueOrNa(report.servedSum, num), "arrival ticks across all tasks") +
+    card("Makespan", valueOrNa(report.makespan, num), "ticks of the last arrival") +
+    card("ICBS sum", valueOrNa(icbs.sum, num), "the served tree's own cost") +
+    card("Greedy gap", valueOrNa(greedy.gap, num), "ticks the greedy order pays over the tree") +
+    card("Density link", valueOrNa(report.replications && report.replications.correlation, function (r) { return "r = " + Number(r).toFixed(2); }), "split density against rejections") +
+    "</div>"
+  );
+
+  parts.push(ladderBlock(report.ladder || []));
+  parts.push(arrivalsBlock(report.arrivals || []));
+  parts.push(densityBlock(report.density || []));
+  parts.push(replicationsBlock(report.replications));
+  parts.push(curveBlock(report.curve || []));
+  parts.push(windowsBlock(report.windows || []));
+
+  reportNode.innerHTML = parts.join("");
+  reportNode.hidden = false;
+  emptyNode.hidden = true;
+  prefillAsk(report.windows && report.windows[0]);
+}
+
+function card(key, value, sub) {
+  return "<div class='card'><div class='k'>" + esc(key) + "</div><div class='v'>" + value + "</div><div class='s'>" + esc(sub) + "</div></div>";
+}
+
+function ladderBlock(ladder) {
+  var rows = ladder.map(function (rung) {
+    var solvedChip = rung.solved
+      ? "<span class='chip chip--ok'>solved</span>"
+      : "<span class='chip chip--bad'>not solved</span>";
+    var note = rung.reason ? "<span class='sub'>" + esc(rung.reason) + "</span>" : "";
+    return "<tr><td>" + esc(rung.solver) + note + "</td><td>" + solvedChip + "</td>" +
+      "<td class='num'>" + valueOrNa(rung.sum, num) + "</td>" +
+      "<td class='num'>" + valueOrNa(rung.gap, num) + "</td>" +
+      "<td class='num'>" + valueOrNa(rung.expanded, num) + "</td>" +
+      "<td class='num'>" + valueOrNa(rung.micros, ms) + "</td></tr>";
+  }).join("");
+  return block("The degradation ladder",
+    "Three solvers take the same manifest: the plain conflict tree, the cardinal-aware tree, and the greedy booking order. Sums are arrival ticks, and lower is better.",
+    "<div class='table-scroll'><table><thead><tr><th>solver</th><th>outcome</th><th class='num'>sum</th><th class='num'>gap</th><th class='num'>expanded</th><th class='num'>time</th></tr></thead><tbody>" + rows + "</tbody></table></div>");
+}
+
+function arrivalsBlock(arrivals) {
+  var rows = arrivals.map(function (row) {
+    var late = row.arrived > row.due;
+    var state = late
+      ? "<span class='chip chip--bad'>late by " + num(row.arrived - row.due) + "</span>"
+      : "<span class='chip chip--ok'>on time</span>";
+    return "<tr" + (late ? " class='late'" : "") + "><td>" + esc(row.id) + "</td><td>" + esc(row.amr) + "</td><td>" + esc(row.klass) + "</td>" +
+      "<td class='mono'>" + esc(row.start) + " to " + esc(row.goal) + "</td>" +
+      "<td class='num'>" + valueOrNa(row.due, num) + "</td>" +
+      "<td class='num'>" + valueOrNa(row.arrived, num) + "</td>" +
+      "<td>" + state + "</td></tr>";
+  }).join("");
+  return block("Arrivals against dues",
+    "Each task's arrival tick from the served plan, read against its deadline. A late row means the joint plan paid for congestion with time.",
+    "<div class='table-scroll'><table><thead><tr><th>task</th><th>robot</th><th>class</th><th>run</th><th class='num'>due</th><th class='num'>arrived</th><th>state</th></tr></thead><tbody>" + rows + "</tbody></table></div>");
+}
+
+function densityBlock(density) {
+  if (!density.length) {
+    return block("Congestion density", "Where the conflict tree had to split, bucketed four ticks at a time.",
+      "<div class='empty'>The engine reported no splits for this floor.</div>");
+  }
+  var buckets = [];
+  var byRegion = new Map();
+  density.forEach(function (row) {
+    var label = row.tickFrom + " to " + row.tickTo;
+    if (!buckets.some(function (b) { return b.label === label; })) {
+      buckets.push({ label: label, from: row.tickFrom });
+    }
+    if (!byRegion.has(row.region)) {
+      byRegion.set(row.region, []);
+    }
+    byRegion.get(row.region).push(row);
+  });
+  buckets.sort(function (a, b) { return a.from - b.from; });
+  var maxSplits = 1;
+  density.forEach(function (row) { if (row.splits > maxSplits) maxSplits = row.splits; });
+
+  var head = buckets.map(function (b) { return "<th class='num'>" + esc(b.label) + "</th>"; }).join("");
+  var body = "";
+  byRegion.forEach(function (rows, region) {
+    var cells = buckets.map(function (b) {
+      var match = rows.find(function (r) { return r.tickFrom + " to " + r.tickTo === b.label; });
+      if (!match || match.splits === 0) {
+        return "<td class='cell'>·</td>";
+      }
+      var alpha = 0.08 + (match.splits / maxSplits) * 0.82;
+      var hot = match.splits / maxSplits > 0.55;
+      var badge = match.cardinal > 0 ? "<span class='card3' title='cardinal conflict sides'>" + num(match.cardinal) + "</span>" : "";
+      return "<td class='cell" + (hot ? " hot" : "") + "' style='background: rgba(255,54,168," + alpha.toFixed(2) + ")'>" + num(match.splits) + badge + "</td>";
+    }).join("");
+    body += "<tr><td class='region'>" + esc(region) + "</td>" + cells + "</tr>";
+  });
+
+  return block("Congestion density",
+    "Where the conflict tree had to split, counted by region and four-tick bucket. Darker cells split more. A corner number counts splits that had no cheaper resolution.",
+    "<div class='heat'><table><thead><tr><th></th>" + head + "</tr></thead><tbody>" + body + "</tbody></table></div>" +
+    "<p class='heat-note'>Read a hot cell before releasing the next wave: the plan pays for that congestion somewhere.</p>");
+}
+
+function replicationsBlock(replications) {
+  if (!replications || !replications.regions || !replications.regions.length) {
+    return block("Shuffled replications", "The manifest order is shuffled with eight seeds to test how stable the congestion reading is.",
+      "<div class='empty'>The engine reported no replications for this floor.</div>");
+  }
+  var correlation = replications.correlation;
+  var regions = replications.regions;
+  var maxDensity = Math.max.apply(null, regions.map(function (r) { return r.density; }).concat([1]));
+  var maxRej = Math.max.apply(null, regions.map(function (r) { return r.meanRejections; }).concat([1]));
+
+  var W = 280, H = 160, PAD = 24;
+  var dots = regions.map(function (r) {
+    var x = PAD + (r.density / maxDensity) * (W - PAD * 2);
+    var y = H - PAD - (r.meanRejections / maxRej) * (H - PAD * 2);
+    return "<circle cx='" + x.toFixed(1) + "' cy='" + y.toFixed(1) + "' r='3.5' fill='#221531'><title>" + esc(r.region) + ": density " + num(r.density) + ", rejections " + Number(r.meanRejections).toFixed(2) + "</title></circle>";
+  }).join("");
+
+  var regionRows = regions.map(function (r) {
+    return "<tr><td>" + esc(r.region) + "</td><td class='num'>" + num(r.density) + "</td><td class='num'>" + Number(r.meanRejections).toFixed(2) + "</td></tr>";
+  }).join("");
+
+  var runRows = (replications.runs || []).map(function (run) {
+    var rejections = run.rejections && Object.keys(run.rejections).length
+      ? Object.keys(run.rejections).map(function (k) { return esc(k) + " " + num(run.rejections[k]); }).join(", ")
+      : "none";
+    return "<tr><td class='mono'>" + num(run.seed) + "</td><td>" + (run.solved ? "yes" : "no") + "</td>" +
+      "<td class='num'>" + valueOrNa(run.sum, num) + "</td><td>" + rejections + "</td></tr>";
+  }).join("");
+
+  return block("Shuffled replications",
+    "The manifest order is shuffled with eight seeds. A region's split density should track its mean reservation rejections, and the correlation says how tightly.",
+    "<div class='scatter'><svg viewBox='0 0 " + W + " " + H + "' role='img' aria-label='split density against mean rejections'>" +
+    "<line x1='" + PAD + "' y1='" + (H - PAD) + "' x2='" + (W - PAD) + "' y2='" + (H - PAD) + "' stroke='rgba(34,21,49,0.3)'/>" +
+    "<line x1='" + PAD + "' y1='" + PAD + "' x2='" + PAD + "' y2='" + (H - PAD) + "' stroke='rgba(34,21,49,0.3)'/>" +
+    dots +
+    "</svg><p class='cap'>Split density against mean reservation rejections by region. r = " + (correlation === null || correlation === undefined ? "n/a" : Number(correlation).toFixed(2)) + ".</p></div>" +
+    "<div style='height:14px'></div>" +
+    "<div class='table-scroll'><table><thead><tr><th>region</th><th class='num'>split density</th><th class='num'>mean rejections</th></tr></thead><tbody>" + regionRows + "</tbody></table></div>" +
+    "<div style='height:14px'></div>" +
+    "<div class='table-scroll'><table><thead><tr><th>seed</th><th>solved</th><th class='num'>sum</th><th>rejections</th></tr></thead><tbody>" + runRows + "</tbody></table></div>");
+}
+
+function curveBlock(curve) {
+  if (!curve.length) {
+    return block("Deadline hit rate", "The manifest is released one task at a time to see which batch sizes the greedy order can still serve.",
+      "<div class='empty'>The engine reported no curve for this floor.</div>");
+  }
+  var rows = curve.map(function (row) {
+    var rate = row.hitRate === null || row.hitRate === undefined ? null : Number(row.hitRate);
+    var bar = rate === null
+      ? "n/a"
+      : num(Math.round(rate * 100)) + "%" +
+        "<span class='bar-track'><span class='bar-fill' style='width:" + Math.max(0, Math.min(100, rate * 100)).toFixed(1) + "%'></span></span>";
+    return "<tr><td class='num'>" + num(row.batch) + "</td>" +
+      "<td class='num'>" + (row.icbsSolved ? valueOrNa(row.icbsSum, num) : "n/a") + "</td>" +
+      "<td class='num'>" + valueOrNa(row.prioritizedServed, num) + "</td>" +
+      "<td>" + bar + "</td></tr>";
+  }).join("");
+  return block("Deadline hit rate",
+    "The manifest is released one task at a time. The joint tree serves every batch; the greedy order starts dropping tasks as the batch grows, and the hit rate records where.",
+    "<div class='table-scroll'><table><thead><tr><th class='num'>batch</th><th class='num'>joint sum</th><th class='num'>greedy served</th><th>greedy hit rate</th></tr></thead><tbody>" + rows + "</tbody></table></div>");
+}
+
+function windowsBlock(windows) {
+  if (!windows.length) {
+    return block("The gate journal", "Every window ask the floor document carries, answered from the served plan.",
+      "<div class='empty'>This floor document carries no window asks.</div>");
+  }
+  var rows = windows.map(function (row) {
+    var chip = row.decision === "fire"
+      ? "<span class='chip chip--fire'>fire</span>"
+      : "<span class='chip chip--hesitate'>hesitate</span>";
+    var verdict = verdictSentence(row.verdict);
+    var reasons = (row.reasons || []).map(function (r) { return esc(r); }).join(" ");
+    return "<tr><td>" + esc(row.id) + "</td><td>" + esc(row.amr) + "</td><td>" + esc(row.klass) + "</td>" +
+      "<td class='mono'>" + esc(row.origin) + " to " + esc(row.destination) + "</td>" +
+      "<td class='num'>" + valueOrNa(row.earliest, num) + " to " + valueOrNa(row.latest, num) + "</td>" +
+      "<td>" + chip + "</td><td>" + verdict + (reasons ? "<span class='sub'>" + reasons + "</span>" : "") + "</td></tr>";
+  }).join("");
+  return block("The gate journal",
+    "Every window ask the floor document carries, answered from the served plan. A fired departure is granted a window; a hesitant one is held with the reason recorded.",
+    "<div class='table-scroll'><table><thead><tr><th>ask</th><th>robot</th><th>class</th><th>run</th><th class='num'>window</th><th>call</th><th>verdict</th></tr></thead><tbody>" + rows + "</tbody></table></div>");
+}
+
+function verdictSentence(verdict) {
+  if (!verdict) return "n/a";
+  if (verdict.granted && verdict.grant) {
+    var regions = (verdict.grant.regions || []).map(esc).join(", ");
+    return "Granted. Departs at tick " + num(verdict.grant.depart) + ", arrives at tick " + num(verdict.grant.arrive) +
+      ", and pays " + num(verdict.grant.detour) + " ticks of detour" + (regions ? " through " + regions : "") + ".";
+  }
+  if (verdict.slo) {
+    var reasons = (verdict.slo.reasons || []).map(esc).join(" ");
+    return "Held. " + (reasons || "The window would break a service deadline.") +
+      (verdict.slo.earliestArrival !== null && verdict.slo.earliestArrival !== undefined
+        ? " The earliest arrival the plan allows is tick " + num(verdict.slo.earliestArrival) + "." : "");
+  }
+  return "Held.";
+}
+
+function block(title, blurb, bodyHtml) {
+  return "<section class='block'><h2>" + esc(title) + "</h2><p class='blurb'>" + esc(blurb) + "</p>" + bodyHtml + "</section>";
+}
+
+function prefillAsk(windowRow) {
+  if (!windowRow) return;
+  document.getElementById("wId").value = windowRow.id || "W-9";
+  document.getElementById("wAmr").value = windowRow.amr || "";
+  document.getElementById("wClass").value = windowRow.klass || "express";
+  var origin = String(windowRow.origin || "").split(",");
+  var destination = String(windowRow.destination || "").split(",");
+  if (origin.length === 2) {
+    document.getElementById("wOr").value = origin[0].trim();
+    document.getElementById("wOc").value = origin[1].trim();
+  }
+  if (destination.length === 2) {
+    document.getElementById("wDr").value = destination[0].trim();
+    document.getElementById("wDc").value = destination[1].trim();
+  }
+  document.getElementById("wEarly").value = windowRow.earliest !== undefined ? windowRow.earliest : 0;
+  document.getElementById("wLate").value = windowRow.latest !== undefined ? windowRow.latest : 25;
+}
+
+function askGate() {
+  if (!lastSource) {
+    showError("Plan a floor first. The gate answers a window ask from a served plan.", []);
+    return;
+  }
+  var id = document.getElementById("wId").value.trim();
+  var amr = document.getElementById("wAmr").value.trim();
+  var klass = document.getElementById("wClass").value;
+  if (!id || !amr) {
+    showError("The window ask needs an id and a robot name before the gate can answer it.", []);
+    return;
+  }
+  function intOf(elementId, label) {
+    var raw = document.getElementById(elementId).value.trim();
+    var value = Number.parseInt(raw, 10);
+    if (raw === "" || !Number.isFinite(value)) {
+      throw { field: label };
+    }
+    return value;
+  }
+  var request;
+  try {
+    request = {
+      id: id,
+      amr: amr,
+      klass: klass,
+      origin: [intOf("wOr", "origin row"), intOf("wOc", "origin column")],
+      destination: [intOf("wDr", "destination row"), intOf("wDc", "destination column")],
+      earliest: intOf("wEarly", "earliest tick"),
+      latest: intOf("wLate", "latest tick")
+    };
+  } catch (field) {
+    showError("The window ask needs a whole number for the " + esc(field.field) + " field.", []);
+    return;
+  }
+  var button = document.getElementById("gateBtn");
+  clearError();
+  busy(button, true, "Asking the gate...");
+  call("/v1/windows", { fixture: lastSource.fixture, document: lastSource.document, request: request })
+    .then(function (answer) {
+      try {
+        renderAsk(answer, request);
+      } catch (renderFailure) {
+        showError("The engine returned a gate answer this page could not display. The raw response is in the browser console.", []);
+        console.error(renderFailure, answer);
+      }
+    })
+    .catch(function (state) {
+      reportProblem(state);
+    })
+    .finally(function () {
+      busy(button, false, null);
+    });
+}
+
+function renderAsk(answer, request) {
+  var blockNode = document.getElementById("askBlock");
+  var cardNode = document.getElementById("askCard");
+  var chip = answer.decision === "fire"
+    ? "<span class='chip chip--fire'>fire</span>"
+    : "<span class='chip chip--hesitate'>hesitate</span>";
+  var reasons = (answer.reasons || []).map(function (r) { return "<li>" + esc(r) + "</li>"; }).join("");
+  cardNode.innerHTML =
+    "<div class='head'><span class='who'>" + esc(answer.request || request.id) + "</span>" + chip +
+    "<span class='mono' style='font-size:12px;color:var(--silver)'>" + esc(request.amr) + " · " + esc(request.klass) +
+    " · " + num(request.origin[0]) + "," + num(request.origin[1]) + " to " + num(request.destination[0]) + "," + num(request.destination[1]) +
+    " · window " + num(request.earliest) + " to " + num(request.latest) + "</span></div>" +
+    (reasons ? "<ul class='reasons'>" + reasons + "</ul>" : "") +
+    "<p class='verdict'>" + verdictSentence(answer.verdict) + "</p>";
+  blockNode.hidden = false;
+  blockNode.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function loadFixtures() {
+  var token = sessionStorage.getItem("hearth-token");
+  var options = token ? { headers: { authorization: "Bearer " + token } } : undefined;
+  fetch("/v1/fixtures", options).then(function (response) {
+    if (!response.ok) throw new Error("fixtures unavailable");
+    return response.json();
+  }).then(function (list) {
+    var select = document.getElementById("floor");
+    var floors = (list && list.floors) || [];
+    if (!floors.length) throw new Error("no floors");
+    select.textContent = "";
+    floors.forEach(function (floor) {
+      var option = document.createElement("option");
+      option.value = floor;
+      option.textContent = floor;
+      select.appendChild(option);
+    });
+    setHealth(true, "engine reachable");
+  }).catch(function () {
+    // The engine is reachable through the plan endpoints even if the fixture
+    // list cannot be read. Offer the known floor so the page stays usable.
+    var select = document.getElementById("floor");
+    select.textContent = "";
+    var option = document.createElement("option");
+    option.value = "casting-hall";
+    option.textContent = "casting-hall";
+    select.appendChild(option);
+  });
+}
+
+document.getElementById("planBtn").dataset.label = "Plan the floor";
+document.getElementById("docBtn").dataset.label = "Plan the pasted document";
+document.getElementById("gateBtn").dataset.label = "Ask the gate";
+document.getElementById("planBtn").addEventListener("click", function () {
+  var select = document.getElementById("floor");
+  plan({ fixture: select.value });
+});
+document.getElementById("docBtn").addEventListener("click", planDocument);
+document.getElementById("gateBtn").addEventListener("click", askGate);
+
+// --- The drift monitor: observations in, reading and repair out. ---
+
+document.getElementById("watchBtn").addEventListener("click", watchFloor);
+
+function watchFloor() {
+  var text = document.getElementById("obsPaste").value.trim();
+  if (!text) {
+    showError("The observation area is empty.",
+      ["Paste one observation per line: the AMR id, the tick, and the row and column it stood on."]);
+    return;
+  }
+  if (!lastSource) {
+    showError("Plan a floor first.",
+      ["The monitor watches a served plan; run one, then watch the floor."]);
+    return;
+  }
+  var observations = [];
+  var lines = text.split(/\n+/);
+  for (var i = 0; i < lines.length; i++) {
+    var parts = lines[i].trim().split(/[\s,]+/);
+    if (parts.length < 4 || parts.length > 4) {
+      showError("Line " + (i + 1) + " needs exactly four fields: the AMR id, the tick, the row, and the column.",
+        ["The line reads: " + lines[i]]);
+      return;
+    }
+    var tick = Number(parts[1]);
+    var row = Number(parts[2]);
+    var col = Number(parts[3]);
+    if (!Number.isFinite(tick) || !Number.isFinite(row) || !Number.isFinite(col)) {
+      showError("Line " + (i + 1) + " carries a field that is not a number.",
+        ["The line reads: " + lines[i]]);
+      return;
+    }
+    observations.push({ id: parts[0], tick: tick, at: [row, col] });
+  }
+  var body = { observations: observations };
+  if (lastSource.fixture) body.fixture = lastSource.fixture;
+  if (lastSource.document) body.document = lastSource.document;
+  var button = document.getElementById("watchBtn");
+  clearError();
+  busy(button, true, "Watching...");
+  call("/v1/monitor", body).then(function (payload) {
+    try {
+      renderWatch(payload);
+    } catch (renderFailure) {
+      showError("The engine returned a reading this page could not display. The raw response is in the browser console.", []);
+      console.error(renderFailure, payload);
+    }
+  }).catch(function (state) {
+    reportProblem(state);
+  }).finally(function () {
+    busy(button, false, null);
+  });
+}
+
+function renderWatch(payload) {
+  var reading = payload.reading || {};
+  var repair = payload.repair || {};
+  var violationRows = (reading.violations || []).map(function (violation) {
+    return "<tr><td class='mono'>" + esc(violation.id) + "</td>" +
+      "<td><span class='chip chip--" + (violation.kind === "late" || violation.kind === "collision" ? "hesitate" : "armed") + "'>" + esc(violation.kind) + "</span></td>" +
+      "<td class='num'>" + esc(violation.tick) + "</td>" +
+      "<td>" + esc(violation.detail) + "</td></tr>";
+  }).join("");
+  var arrived = (reading.arrived || []).map(function (id) {
+    return "<span class='chip chip--accepted'>" + esc(id) + "</span>";
+  }).join(" ");
+  var late = (repair.late || []).map(function (id) {
+    return "<span class='chip chip--hesitate'>" + esc(id) + "</span>";
+  }).join(" ");
+  document.getElementById("watchReport").hidden = false;
+  document.getElementById("watchReport").innerHTML =
+    "<p class='hint' style='margin:0'><strong>" +
+    esc(reading.observed) + " observed · " + esc(reading.onPlan) + " on plan" +
+    ((reading.violations || []).length ? " · " + esc((reading.violations || []).length) + " violations" : " · the floor matches the plan") +
+    "</strong>" +
+    (arrived ? "<p class='hint' style='margin:4px 0 0'>arrived: " + arrived + "</p>" : "") +
+    "</p>" +
+    (violationRows
+      ? "<div class='table-scroll' style='margin-top:8px'><table><thead><tr><th>amr</th><th>kind</th><th class='num'>tick</th><th>the floor says</th></tr></thead><tbody>" + violationRows + "</tbody></table></div>"
+      : "") +
+    "<div class='cards' style='margin-top:12px'>" +
+    watchCard("Repair makespan", esc(repair.makespan), "was " + esc(repair.oldMakespan)) +
+    watchCard("Served sum", esc(repair.servedSum), "arrival ticks") +
+    "</div>" +
+    "<p class='hint' style='margin:8px 0 0'>" + esc(repair.verdict) +
+    (late ? " &nbsp; past due: " + late : "") + "</p>";
+  document.getElementById("watchReport").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function watchCard(key, value, sub) {
+  return "<div class='card'><div class='k'>" + esc(key) + "</div><div class='v'>" + value + "</div><div class='s'>" + esc(sub) + "</div></div>";
+}
+
+// --- The token slot: shown only when the engine asks for one. ---
+
+function useToken() {
+  var value = document.getElementById("token").value.trim();
+  if (!value) return;
+  sessionStorage.setItem("hearth-token", value);
+  document.getElementById("tokenSlot").hidden = true;
+  document.getElementById("token").value = "";
+  loadFixtures();
+}
+document.getElementById("tokenUse").addEventListener("click", useToken);
+document.getElementById("token").addEventListener("keydown", function (event) {
+  if (event.key === "Enter") useToken();
+});
+
+fetch("/health").then(function (response) {
+  setHealth(response.ok, response.ok ? "engine reachable" : "engine unreachable");
+}).catch(function () {
+  setHealth(false, "engine unreachable");
+});
+loadFixtures();
+</script>
+</body>
+</html>
