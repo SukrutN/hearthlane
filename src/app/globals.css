@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-silver: var(--silver);
+  --color-signal: var(--signal);
+  --color-ember: var(--ember);
+  --color-deep: var(--deep);
+  --color-smoke: var(--smoke);
+  --font-sans: var(--font-display), "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono-plex), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-display), "Avenir Next", "Segoe UI", sans-serif;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 4px;
+}
+
+:root {
+  --background: #f5f2ea;
+  --foreground: #22262c;
+  --paper: #22262c;
+  --card: #fbf9f2;
+  --silver: #6b7076;
+  --signal: #c2620e;
+  --ember: #8a3d05;
+  --deep: #22262c;
+  --smoke: #2c3138;
+}
+
+@layer base {
+  html {
+    @apply font-sans;
+    background: #f5f2ea;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, #22262c 4%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, #22262c 4%, transparent) 1px, transparent 1px);
+    background-size: 64px 64px;
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: #c2620e;
+    color: #f5f2ea;
+  }
+}
+
+@keyframes hearthlane-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hearthlane-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.rise {
+  animation: hearthlane-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.rise-late {
+  animation: hearthlane-rise 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.12s both;
+}
+
+.marquee-track {
+  animation: hearthlane-marquee 46s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .rise-late,
+  .marquee-track {
+    animation: none;
+  }
+}
