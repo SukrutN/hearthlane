@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>dev.hearth</groupId>
+    <artifactId>hearthline-plan</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <artifactId>hearth-application</artifactId>
+  <name>Hearthline application</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>dev.hearth</groupId>
+      <artifactId>hearth-domain</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <!-- The engine's published fixtures, relative to the engine root so the
+             build works from the repository root (mvn -f engine) as well. -->
+        <directory>${project.basedir}/../fixtures</directory>
+        <targetPath>fixtures</targetPath>
+        <includes>
+          <include>*.json</include>
+          <include>*.txt</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+</project>
