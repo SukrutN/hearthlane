@@ -17,8 +17,8 @@ const mono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Hearthlane — traffic windows for the AMR floor",
-    template: "%s — Hearthlane",
+    default: "Hearthlane, traffic windows for the AMR floor",
+    template: "%s. Hearthlane",
   },
   description:
     "Hearthlane walks a fictional casting hall's release gate: a joint plan meets every deadline, the congestion map says where the tree split, and each window ask is fired or held with the reason journaled.",
