@@ -21,7 +21,7 @@ import { CASTING_HALL } from "@/lib/fixture"
 export const metadata: Metadata = {
   title: "Windows",
   description:
-    "The congestion heatmap, the deadline-hit-rate curve, the degradation ladder, and a release-gate walkthrough — all locked to the engine's reading of the casting hall.",
+    "The congestion heatmap, the deadline-hit-rate curve, the degradation ladder, and a release-gate walkthrough, all locked to the engine's reading of the casting hall.",
 }
 
 const REGIONS = ["North Run", "Main Run", "South Run", "Dispatch Apron", "West Aisle", "Aisle Two"]
@@ -68,13 +68,13 @@ export default function WindowsPage() {
       <SiteHeader />
       <main id="content">
         <section className="px-5 pt-12 pb-14 sm:px-8 lg:px-12 lg:pt-16">
-          <p className="font-mono text-[11px] tracking-[0.18em] text-silver uppercase">02 — Release windows</p>
+          <p className="font-mono text-[11px] tracking-[0.18em] text-silver uppercase">02. Release windows</p>
           <h1 className="rise mt-6 max-w-[14ch] text-[clamp(3.6rem,10vw,8rem)] leading-[0.86] font-medium tracking-[-0.05em]">
             Hesitate, or fire.
           </h1>
           <div className="rise-late mt-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
             <p className="max-w-xl text-lg leading-snug text-silver sm:text-xl">
-              Before the orchestrator releases a wave, it asks one question: is the floor free? Hearthlane answers from the joint plan the hall will actually run — the same plan that met every deadline — and journals the reason either way.
+              Before the orchestrator releases a wave, it asks one question: is the floor free? Hearthlane answers from the joint plan the hall will actually run, the same plan that met every deadline, and journals the reason either way.
             </p>
             <p className="max-w-md text-silver">
               Everything below is one fixture run: six tasks, horizon 30, seed 2027. The figures are locked to the planner&apos;s own test suite; the site cannot drift from the engine.
@@ -87,7 +87,7 @@ export default function WindowsPage() {
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
             <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">The degradation ladder</h2>
             <p className="max-w-md text-silver">
-              Optimal first, improved second, greedy last — and the greedy rung is allowed to fail. An unsolved rung reports no sum and no gap.
+              Optimal first, improved second, greedy last, and the greedy rung is allowed to fail. An unsolved rung reports no sum and no gap.
             </p>
           </div>
           <div className="mt-10 overflow-x-auto">
@@ -105,8 +105,8 @@ export default function WindowsPage() {
                 {LADDER.map((rung) => (
                   <tr key={rung.solver} className="border-b border-foreground/10 align-baseline">
                     <td className="py-4 pr-4 font-mono text-sm">{rung.solver}</td>
-                    <td className="py-4 pr-4 font-mono text-sm">{rung.sum ?? "—"}</td>
-                    <td className="py-4 pr-4 font-mono text-sm">{rung.gap ?? "—"}</td>
+                    <td className="py-4 pr-4 font-mono text-sm">{rung.sum ?? ". "}</td>
+                    <td className="py-4 pr-4 font-mono text-sm">{rung.gap ?? ". "}</td>
                     <td className="py-4 pr-4 font-mono text-sm">{rung.expanded}</td>
                     <td className="py-4 text-sm text-silver">
                       {rung.solved ? (
@@ -124,7 +124,7 @@ export default function WindowsPage() {
             </table>
           </div>
           <p className="mt-6 max-w-2xl text-sm text-silver">
-            ICBS reads cardinality while it searches: at a split, it asks which side has no cheaper way out and commits. Same sum of costs (69) as plain CBS, 23 expansions instead of 34. The prioritized rung is the honest failure — booking Ember first pins Tinder, whose due is tick 9.
+            ICBS reads cardinality while it searches: at a split, it asks which side has no cheaper way out and commits. Same sum of costs (69) as plain CBS, 23 expansions instead of 34. The prioritized rung can fail. Booking Ember first pins Tinder, whose due is tick 9.
           </p>
         </section>
 
@@ -167,7 +167,7 @@ export default function WindowsPage() {
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
             <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">The congestion heatmap</h2>
             <p className="max-w-md text-silver">
-              Cardinal-conflict density: where the tree split, bucket by bucket. A dot marks a side with no cheaper way out — the cardinal half of the split.
+              Cardinal-conflict density: where the tree split, bucket by bucket. A dot marks a side with no cheaper way out, the cardinal half of the split.
             </p>
           </div>
           <div className="mt-10 overflow-x-auto">
@@ -221,7 +221,7 @@ export default function WindowsPage() {
             </div>
           </div>
           <p className="mt-6 max-w-2xl text-sm text-silver">
-            The tree splits almost entirely in ticks 4–7 — the morning wave — and South Run carries the only cardinal sides (4 of its 8 splits had no cheaper way out). Dispatch Apron heats later, ticks 8–11, as the bulk runs return south. Aisle Three never splits: it is the pressure valve the reroute uses.
+            The tree splits almost entirely in ticks 4–7, the morning wave, and South Run carries the only cardinal sides (4 of its 8 splits had no cheaper way out). Dispatch Apron heats later, ticks 8–11, as the bulk runs return south. Aisle Three never splits: it is the pressure valve the reroute uses.
           </p>
         </section>
 
@@ -306,7 +306,7 @@ export default function WindowsPage() {
                 </tbody>
               </table>
               <p className="mt-6 max-w-xl text-sm text-silver">
-                Batch 3 is where Tinder (due 9) stops being servable by a greedy order: two of three tasks land, the third is refused. ICBS keeps the full batch solved the whole way up — sums 19, 38, 43, 52, 61, 69.
+                Batch 3 is where Tinder (due 9) stops being servable by a greedy order: two of three tasks land, the third is refused. ICBS keeps the full batch solved the whole way up, sums 19, 38, 43, 52, 61, 69.
               </p>
             </div>
           </div>
@@ -421,7 +421,7 @@ export default function WindowsPage() {
                       </p>
                       {!fired ? (
                         <p className="mt-2 text-sm text-silver">
-                          The route exists; the gate holds it all the same. The Main Run carries conflict density in the departure bucket — the wave waits.
+                          The route exists; the gate holds it all the same. The Main Run carries conflict density in the departure bucket, the wave waits.
                         </p>
                       ) : null}
                     </div>
@@ -431,13 +431,13 @@ export default function WindowsPage() {
             })}
           </div>
           <p className="mt-8 max-w-2xl text-sm text-silver">
-            Kiln&apos;s express run leaves the Dispatch Apron at tick 0 into a clear corridor — fire. Ash asks to enter the Main Run at tick 4, the exact bucket where the tree split three times — hesitate. The same plan that served six deadlines answers both.
+            Kiln&apos;s express run leaves the Dispatch Apron at tick 0 into a clear corridor, fire. Ash asks to enter the Main Run at tick 4, the exact bucket where the tree split three times, hesitate. The same plan that served six deadlines answers both.
           </p>
         </section>
 
         {/* Sources */}
         <section id="sources" className="border-t border-foreground/10 px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-          <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">Sources &amp; honesty</h2>
+          <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">Sources</h2>
           <ul className="mt-10 max-w-3xl">
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">The method.</span> Sharon, G., Stern, R., Goldenberg, M., Felner, A.
@@ -447,14 +447,14 @@ export default function WindowsPage() {
             </li>
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">Industry analogs.</span> openTCS (Fraunhofer IML, MIT) splits
-              transport tasks, vehicle state, and scheduling the way the window API mirrors its dispatch seam —
+              transport tasks, vehicle state, and scheduling the way the window API mirrors its dispatch seam . 
               lighter and mathier. Open-RMF&apos;s rmf_traffic negotiates time-space schedules and rmf_task carries
               task deadlines; the deadline curve here is the same argument made small.
             </li>
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">The fiction.</span> Ferro &amp; Lume is not a foundry. Ember, Brann,
               Tinder, Soot, Cinder, Slag, Kiln, and Ash are not a fleet. Every figure on this page is a worked
-              example invented for the planner — locked by its tests, rendered here without invention.
+              example invented for the planner, locked by its tests, rendered here without invention.
             </li>
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">The engine.</span> The figures come from{" "}

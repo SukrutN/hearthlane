@@ -103,7 +103,7 @@ export function SiteHeader() {
                 <br />
                 No vehicle sim
                 <br />
-                The planner math stays honest
+                The planner math is checked
               </p>
             </div>
           </nav>

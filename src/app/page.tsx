@@ -14,7 +14,7 @@ const PRINCIPLES = [
     n: "02",
     code: "002",
     title: "Priority breaks ties",
-    body: "When two routes disagree, the higher class wins the first claim. Express outranks standard, standard outranks bulk — and the loser waits or walks around.",
+    body: "When two routes disagree, the higher class wins the first claim. Express outranks standard, standard outranks bulk, and the loser waits or walks around.",
   },
   {
     n: "03",
@@ -35,7 +35,7 @@ const NOTES = [
     n: "01",
     title: "Six AMRs, thirty ticks",
     meta: "The manifest",
-    body: "Two express runs, two standard runs, two bulk runs ride the casting hall. The dues are deliberately tight — Tinder must land by tick 9 or the floor owes an apology.",
+    body: "Two express runs, two standard runs, two bulk runs ride the casting hall. The dues are deliberately tight. Tinder must land by tick 9 or the floor owes an apology.",
   },
   {
     n: "02",
@@ -60,10 +60,10 @@ const NOTES = [
 const SPECS: [string, string][] = [
   ["Floor", "12 by 9 cells, 68 open."],
   ["Corridors", "North, Main, South runs; a dispatch apron on the south wall."],
-  ["Aisles", "West, Two, Three, Four — cut through the racks."],
+  ["Aisles", "West, Two, Three, Four, cut through the racks."],
   ["Tasks", "Six invented AMRs with priority classes and due ticks."],
   ["Horizon", "Thirty ticks of one cell per tick."],
-  ["Seed", "2027 — the replication study runs 2027 through 2034."],
+  ["Seed", "2027, the replication study runs 2027 through 2034."],
 ]
 
 export default function HomePage() {
@@ -72,7 +72,7 @@ export default function HomePage() {
       <SiteHeader />
       <main id="content">
         <section className="flex min-h-[calc(100svh-4.25rem)] flex-col justify-between px-5 pt-12 pb-8 sm:px-8 lg:px-12 lg:pt-16">
-          <p className="font-mono text-[11px] tracking-[0.18em] text-silver uppercase">01 — AMR release windows</p>
+          <p className="font-mono text-[11px] tracking-[0.18em] text-silver uppercase">01. AMR release windows</p>
           <h1 className="rise max-w-[12ch] text-[clamp(4.4rem,12vw,9.2rem)] leading-[0.84] font-medium tracking-[-0.05em]">
             Read the
             <br />
@@ -103,7 +103,7 @@ export default function HomePage() {
                 A WES should release robot work into a floor it has already read. Hearthlane plans the whole batch jointly, then answers window asks from the plan the floor will actually run.
               </p>
               <p className="mt-8 max-w-xl text-silver">
-                The tool is a planner, not a fleet simulator: no chassis, no batteries, no telemetry. What it holds is the honest part — an optimal joint plan with its optimality gap stated, and a congestion signal measured where the conflict tree split.
+                This is a planner. No chassis, no batteries, no telemetry. It keeps a joint plan, states the optimality gap, and measures congestion where the conflict tree split.
               </p>
             </div>
             <div>
@@ -183,7 +183,7 @@ export default function HomePage() {
             gate.
           </h2>
           <p className="mt-6 max-w-lg text-lg text-silver">
-            One ask fires, one hesitates — with the corridor, the bucket, and the tick range journaled as the reason. The ladder, the curve, and the congestion map are all on the same page.
+            One ask fires, one hesitates, with the corridor, the bucket, and the tick range journaled as the reason. The ladder, the curve, and the congestion map are all on the same page.
           </p>
           <Link
             href="/windows"
