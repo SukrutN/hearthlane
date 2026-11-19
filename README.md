@@ -1,5 +1,7 @@
 # hearthlane
 
+Live site: https://sukrutn.github.io/hearthlane/
+
 The showcase site for **`hearthline-plan`** — a fictional casting hall whose
 release gate you can read in the browser. Hearthlane walks the same fixture run
 the planner's own tests assert: the degradation ladder, the served arrivals, the
