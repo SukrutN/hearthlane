@@ -2,7 +2,8 @@
 
 Live site: https://sukrutn.github.io/hearthlane/
 
-The showcase site for **`hearthline-plan`** — a fictional casting hall whose
+The showcase site for the **Hearthline planner** (`engine/` in this
+repository) — a fictional casting hall whose
 release gate you can read in the browser. Hearthlane walks the same fixture run
 the planner's own tests assert: the degradation ladder, the served arrivals, the
 congestion heatmap, the deadline-hit-rate curve, and a release-gate decision
@@ -33,11 +34,11 @@ without invention of its own.
 ## Where the figures come from
 
 Every number on the site is locked to the engine. `src/lib/figures.ts` ports
-the canonical reading asserted by `hearthline-plan`'s behavior test
-(`HearthBehaviorTest`), and `src/lib/figures.test.ts` re-asserts each figure
-here — the site's half of the characterization contract. `src/lib/fixture.ts`
-is a TypeScript port of the planner's fixture,
-`hearthline-plan/fixtures/casting-hall.json`.
+the canonical reading asserted by the planner's behavior test
+(`HearthBehaviorTest`, at `engine/`), and `src/lib/figures.test.ts` re-asserts
+each figure here — the site's half of the characterization contract, now run in
+the same CI as the engine's own half. `src/lib/fixture.ts` reads the planner's
+published fixture, `engine/fixtures/casting-hall.json`.
 
 If the engine's figures move, the engine test moves first, then this port.
 The site never computes a figure of its own.
@@ -55,9 +56,10 @@ The site never computes a figure of its own.
   time-space schedules; `rmf_task` carries task deadlines. The deadline curve
   on the windows page is that argument made small.
 
-## The sibling repository
+## The planner
 
-The planner lives in **`hearthline-plan`** (Java 21, Maven, stateless): CBS and
+The planner lives at **`engine/`** in this repository (Java 21, Maven,
+stateless): CBS and
 ICBS over a painted floor grid, deadline-pruned space-time search, priority
 tie-breaks, the density signal, the degradation ladder, and the window gate.
 Its CLI (`hearth plan`, `hearth windows`) prints the same reading this site

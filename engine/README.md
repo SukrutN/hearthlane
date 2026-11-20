@@ -6,9 +6,11 @@ it returns a joint plan: when each robot departs, when it arrives, where the
 conflict tree had to split, and whether every deadline can be met at once.
 
 It does not keep a fleet, an order stream, or a vehicle simulator. Nothing is
-stored after the response. The [showcase site](https://github.com/SukrutN/hearthlane)
-is a visual walkthrough of one fictional hall. The figures on that site are
-locked to the reading this engine prints.
+stored after the response. This planner lives at `engine/` in the
+[hearthlane](https://github.com/SukrutN/hearthlane) site repository, its full
+history carried over from the old `hearthline-plan` repository. The site's
+pages are a visual walkthrough of one fictional hall. The figures on that site
+are locked to the reading this engine prints.
 
 **Fiction disclaimer.** The Ferro & Lume casting hall is invented — the floor,
 the tasks, the fleet names, and every figure. The method they demonstrate is
@@ -16,10 +18,11 @@ not, and its sources are cited below.
 
 ## Run the tests
 
-Java 21 and Maven 3.9 or newer.
+Java 21 and Maven 3.9 or newer. From the repository root (or from `engine/`,
+with the paths dropped):
 
 ```bash
-mvn -B verify
+mvn -B -f engine verify
 ```
 
 The domain tests are hand cases (swap, pocket, crossing, deadline prune, priority
@@ -29,19 +32,19 @@ canonical reading of the casting hall fixture, figure by figure.
 ## Plan a floor from a file
 
 ```bash
-mvn -B -DskipTests package
-java -jar cli/target/hearth.jar plan fixtures/casting-hall.json
+mvn -B -f engine -DskipTests package
+java -jar engine/cli/target/hearth.jar plan engine/fixtures/casting-hall.json
 ```
 
 The reading prints the degradation ladder, the arrivals against their dues, the
 conflict-density map, the replication study, the deadline curve, and the gate
-journal. `hearth windows fixtures/casting-hall.json` prints just the gate
+journal. `hearth windows engine/fixtures/casting-hall.json` prints just the gate
 journal. The document format is [docs/windows.md](docs/windows.md).
 
 ## Serve the API
 
 ```bash
-java -jar api/target/hearth-api.jar
+java -jar engine/api/target/hearth-api.jar
 ```
 
 The process listens on port 8093. `PORT` changes it.
