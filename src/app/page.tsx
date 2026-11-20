@@ -51,9 +51,9 @@ const NOTES = [
   },
   {
     n: "04",
-    title: "The map predicts the mess",
+    title: "Congestion, measured in advance",
     meta: "r = 0.69",
-    body: "Eight seeded shuffles of the manifest order: a region's split density tracks its mean reservation rejections at r = 0.69. Congestion is knowable before the wave goes out.",
+    body: "Eight seeded shuffles of the manifest order: a region's split density tracks its mean reservation rejections at r = 0.69. You can read the congestion before the wave goes out.",
   },
 ]
 
@@ -80,7 +80,9 @@ export default function HomePage() {
           </h1>
           <div className="rise-late flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <p className="max-w-xl text-lg leading-snug text-silver sm:text-xl">
-              Ferro &amp; Lume is invented. No real foundry rents robots by the tick. Hearthlane still takes its traffic seriously: one joint plan, every deadline met, and a release gate that fires or hesitates with the reason journaled.
+              Hearthlane is a demo of AMR traffic planning for a fictional foundry: six robots, one joint plan, every
+              deadline met, and a release gate that grants or holds each ask with the reason attached. Ferro &amp; Lume
+              is invented. The planner is real code.
             </p>
             <div className="flex flex-wrap items-center gap-5">
               <Link
@@ -103,7 +105,8 @@ export default function HomePage() {
                 A WES should release robot work into a floor it has already read. Hearthlane plans the whole batch jointly, then answers window asks from the plan the floor will actually run.
               </p>
               <p className="mt-8 max-w-xl text-silver">
-                This is a planner. No chassis, no batteries, no telemetry. It keeps a joint plan, states the optimality gap, and measures congestion where the conflict tree split.
+                This is a planner, not a fleet system. It keeps a joint plan, reports the optimality gap, and measures
+                congestion where the conflict tree had to split.
               </p>
             </div>
             <div>
@@ -123,9 +126,9 @@ export default function HomePage() {
         <section id="method" className="border-t border-foreground/10 px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <h2 className="max-w-3xl text-[clamp(2.6rem,6vw,5.4rem)] leading-[0.9] tracking-[-0.045em]">
-              Four rules,
+              How the
               <br />
-              one gate.
+              planner works.
             </h2>
             <p className="max-w-sm text-silver">
               The method is conflict-based search, extended with deadlines and priority classes. The figures on this site are locked to the engine&apos;s own reading of the casting hall.
@@ -153,9 +156,9 @@ export default function HomePage() {
         <section className="border-t border-foreground/10 px-5 py-20 sm:px-8 lg:px-12 lg:py-28">
           <p className="font-mono text-[11px] tracking-[0.18em] text-silver uppercase">Floor notes</p>
           <h2 className="mt-4 max-w-4xl text-[clamp(2.6rem,6vw,5.4rem)] leading-[0.9] tracking-[-0.045em]">
-            What the sample
+            What you&apos;re
             <br />
-            is willing to show.
+            looking at.
           </h2>
           <ul className="mt-12">
             {NOTES.map((note) => (
@@ -183,7 +186,8 @@ export default function HomePage() {
             gate.
           </h2>
           <p className="mt-6 max-w-lg text-lg text-silver">
-            One ask fires, one hesitates, with the corridor, the bucket, and the tick range journaled as the reason. The ladder, the curve, and the congestion map are all on the same page.
+            One ask is granted, one is held, each with the corridor, the bucket, and the tick range recorded as the
+            reason. The ladder, the curve, and the congestion map are all on the same page.
           </p>
           <Link
             href="/windows"

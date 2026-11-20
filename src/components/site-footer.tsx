@@ -7,8 +7,10 @@ export function SiteFooter() {
         <div>
           <p className="text-3xl tracking-[-0.04em]">Hearthlane</p>
           <p className="mt-3 max-w-sm text-silver">
-            A traffic-window notebook for one fictional casting hall. The floor, the fleet, and every figure are invented, the method they demonstrate is not, and its sources are cited.
+            An AMR traffic-planning demo for a fictional casting hall. The floor, the fleet, and every figure are
+            invented; the method is not.
           </p>
+          <p className="mt-3 text-sm text-silver">Built by Sukrut Nadigotti</p>
         </div>
         <div>
           <p className="font-mono text-[11px] tracking-[0.16em] text-silver uppercase">Hall</p>

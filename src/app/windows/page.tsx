@@ -77,7 +77,8 @@ export default function WindowsPage() {
               Before the orchestrator releases a wave, it asks one question: is the floor free? Hearthlane answers from the joint plan the hall will actually run, the same plan that met every deadline, and journals the reason either way.
             </p>
             <p className="max-w-md text-silver">
-              Everything below is one fixture run: six tasks, horizon 30, seed 2027. The figures are locked to the planner&apos;s own test suite; the site cannot drift from the engine.
+              Everything below is one fixture run: six tasks, horizon 30, seed 2027. The figures come from the
+              planner&apos;s own test suite, so this page and the engine cannot drift apart.
             </p>
           </div>
         </section>
@@ -112,7 +113,7 @@ export default function WindowsPage() {
                       {rung.solved ? (
                         <span>
                           <span className="mr-2 text-signal">solved</span>
-                          {rung.solver === "ICBS" ? "same optimum, fewer nodes" : "the optimum, honestly stated"}
+                          {rung.solver === "ICBS" ? "same optimum, fewer nodes" : "the optimum"}
                         </span>
                       ) : (
                         <span className="text-ember">unsolved: {rung.reason}</span>
@@ -221,7 +222,7 @@ export default function WindowsPage() {
             </div>
           </div>
           <p className="mt-6 max-w-2xl text-sm text-silver">
-            The tree splits almost entirely in ticks 4–7, the morning wave, and South Run carries the only cardinal sides (4 of its 8 splits had no cheaper way out). Dispatch Apron heats later, ticks 8–11, as the bulk runs return south. Aisle Three never splits: it is the pressure valve the reroute uses.
+            The tree splits almost entirely in ticks 4–7, the morning wave, and South Run carries the only cardinal sides (4 of its 8 splits had no cheaper way out). Dispatch Apron heats later, ticks 8–11, as the bulk runs return south. Aisle Three never splits; the reroute uses it as the way around.
           </p>
         </section>
 
@@ -230,7 +231,7 @@ export default function WindowsPage() {
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
             <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">The deadline-hit-rate curve</h2>
             <p className="max-w-md text-silver">
-              Release batches of growing size and read who lands on time. The joint tree never drops; prioritized breaks at batch 3.
+              Release batches of growing size and see who lands on time. The joint tree never drops; prioritized planning breaks at batch 3.
             </p>
           </div>
           <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20">
@@ -315,7 +316,7 @@ export default function WindowsPage() {
         {/* Replications */}
         <section id="replications" className="border-t border-foreground/10 px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-            <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">The map predicts the mess</h2>
+            <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">Congestion, measured in advance</h2>
             <p className="max-w-md text-silver">
               Eight seeded shuffles of the manifest order, seeds 2027–2034, prioritized rung. Per region: split density against mean reservation rejections.
             </p>
@@ -355,7 +356,7 @@ export default function WindowsPage() {
             <li className="border-t border-foreground/10" />
           </ul>
           <p className="mt-6 max-w-2xl text-sm text-silver">
-            A region that splits the tree often also refuses reservations often, whichever order the manifest is shuffled into. That is the gate&apos;s license: read the map, rate-limit the next wave before the rejections happen.
+            A region that splits the tree often also refuses reservations often, whichever order the manifest is shuffled into. That is what makes the map useful: read it, and you can rate-limit the next wave before the rejections happen.
           </p>
         </section>
 
@@ -364,7 +365,7 @@ export default function WindowsPage() {
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
             <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] tracking-[-0.04em]">Walking the gate</h2>
             <p className="max-w-md text-silver">
-              Two asks ride in the fixture itself. The WES asks; hearthline answers from the served plan; the AMR is fired or held with the reason journaled.
+              Two asks ride in the fixture itself. The WES asks, hearthline answers from the served plan, and the AMR is granted or held with the reason recorded.
             </p>
           </div>
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
@@ -421,7 +422,8 @@ export default function WindowsPage() {
                       </p>
                       {!fired ? (
                         <p className="mt-2 text-sm text-silver">
-                          The route exists; the gate holds it all the same. The Main Run carries conflict density in the departure bucket, the wave waits.
+                          The route exists, but the gate holds it: the Main Run carries conflict density in the
+                          departure bucket, so the wave waits.
                         </p>
                       ) : null}
                     </div>
@@ -431,7 +433,9 @@ export default function WindowsPage() {
             })}
           </div>
           <p className="mt-8 max-w-2xl text-sm text-silver">
-            Kiln&apos;s express run leaves the Dispatch Apron at tick 0 into a clear corridor, fire. Ash asks to enter the Main Run at tick 4, the exact bucket where the tree split three times, hesitate. The same plan that served six deadlines answers both.
+            Kiln&apos;s express run leaves the Dispatch Apron at tick 0 into a clear corridor, so it fires. Ash asks
+            to enter the Main Run at tick 4 — the exact bucket where the tree split three times — so it hesitates.
+            The same plan that served six deadlines answers both.
           </p>
         </section>
 
@@ -454,7 +458,7 @@ export default function WindowsPage() {
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">The fiction.</span> Ferro &amp; Lume is not a foundry. Ember, Brann,
               Tinder, Soot, Cinder, Slag, Kiln, and Ash are not a fleet. Every figure on this page is a worked
-              example invented for the planner, locked by its tests, rendered here without invention.
+              example invented for the planner and locked by its tests.
             </li>
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">The engine.</span> The figures come from{" "}
