@@ -1,9 +1,10 @@
 /**
- * The Ferro & Lume casting hall — a TypeScript port of the planner's canonical
- * fixture, `hearthline-plan/fixtures/casting-hall.json`. The site never invents
- * a figure: everything it renders is either this document or a locked engine
- * reading in `figures.ts`.
+ * The Ferro & Lume casting hall — read from the planner's canonical fixture,
+ * `engine/fixtures/casting-hall.json`, instead of a transcription. The site
+ * never invents a figure: everything it renders is either this document or a
+ * locked engine reading in `figures.ts`.
  */
+import castingHallJson from "../../engine/fixtures/casting-hall.json"
 
 export type Klass = "express" | "standard" | "bulk"
 
@@ -44,38 +45,13 @@ export type FloorDocument = {
   windows: WindowAsk[]
 }
 
-export const CASTING_HALL: FloorDocument = {
-  floor: {
-    id: "casting-hall",
-    name: "Ferro & Lume casting hall",
-    width: 12,
-    height: 9,
-    runs: [
-      { region: "North Run", row: 0, from: 0, to: 11 },
-      { region: "Main Run", row: 3, from: 0, to: 11 },
-      { region: "South Run", row: 6, from: 0, to: 11 },
-      { region: "Dispatch Apron", row: 8, from: 0, to: 11 },
-      { region: "West Aisle", col: 0, from: 1, to: 7 },
-      { region: "Aisle Two", col: 3, from: 1, to: 7 },
-      { region: "Aisle Three", col: 6, from: 1, to: 7 },
-      { region: "Aisle Four", col: 9, from: 1, to: 7 },
-    ],
-  },
-  tasks: [
-    { id: "T-01", amr: "Ember", klass: "express", start: [8, 0], goal: [0, 11], due: 22 },
-    { id: "T-02", amr: "Brann", klass: "standard", start: [0, 0], goal: [8, 11], due: 25 },
-    { id: "T-03", amr: "Tinder", klass: "standard", start: [3, 5], goal: [3, 0], due: 9 },
-    { id: "T-04", amr: "Soot", klass: "bulk", start: [6, 9], goal: [6, 0], due: 14 },
-    { id: "T-05", amr: "Cinder", klass: "express", start: [0, 3], goal: [8, 3], due: 11 },
-    { id: "T-06", amr: "Slag", klass: "bulk", start: [8, 6], goal: [0, 6], due: 15 },
-  ],
-  horizon: 30,
-  seed: 2027,
-  windows: [
-    { id: "W-1", amr: "Kiln", klass: "express", origin: [8, 9], destination: [0, 9], earliest: 0, latest: 25 },
-    { id: "W-2", amr: "Ash", klass: "standard", origin: [3, 7], destination: [3, 10], earliest: 4, latest: 20 },
-  ],
-}
+/**
+ * The planner's published document, exactly as the engine reads it. The one
+ * assertion narrows the JSON import's widened strings and arrays back to the
+ * document types; every field the engine's strict parse rejects is rejected
+ * there first.
+ */
+export const CASTING_HALL = castingHallJson as FloorDocument
 
 /**
  * Paint the floor the way the planner does: first paint wins, corridors before
