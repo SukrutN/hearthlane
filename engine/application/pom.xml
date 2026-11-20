@@ -30,7 +30,9 @@
   <build>
     <resources>
       <resource>
-        <directory>${maven.multiModuleProjectDirectory}/fixtures</directory>
+        <!-- The engine's published fixtures, relative to the engine root so the
+             build works from the repository root (mvn -f engine) as well. -->
+        <directory>${project.basedir}/../fixtures</directory>
         <targetPath>fixtures</targetPath>
         <includes>
           <include>*.json</include>
