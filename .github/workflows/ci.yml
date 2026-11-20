@@ -1,0 +1,42 @@
+# One repo, one workflow: the planner's tests, then the site's figure locks,
+# lint, and the production build.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: planner + site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Install (locked)
+        run: npm ci
+
+      - name: Planner (tests)
+        run: mvn -B -f engine verify
+
+      - name: Figure locks (the site's half of the contract)
+        run: npm test
+
+      - name: Lint (zero errors)
+        run: npm run lint
+
+      - name: Build (production, TypeScript included)
+        run: npm run build
