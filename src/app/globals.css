@@ -1,0 +1,274 @@
+@import "tailwindcss";
+
+/*
+ * The visual system: a neon spread on a light blush base, 4px cell borders,
+ * -0.04em display tracking, and a vw-fluid display scale adopted through
+ * bounded clamps because this site carries data rows that must stay legible
+ * at every width. Type is set in open faces (Space Grotesk, IBM Plex Mono)
+ * self-hosted by next/font; no licensed typeface is bundled.
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-silver: var(--silver);
+  --color-signal: var(--signal);
+  --color-ember: var(--ember);
+  --color-deep: var(--deep);
+  --color-smoke: var(--smoke);
+  --color-neon-blue: var(--neon-blue);
+  --color-neon-sky: var(--neon-sky);
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-violet: var(--neon-violet);
+  --color-neon-pink: var(--neon-pink);
+  --color-neon-yellow: var(--neon-yellow);
+  --color-neon-amber: var(--neon-amber);
+  --color-neon-orange: var(--neon-orange);
+  --color-neon-red: var(--neon-red);
+  --color-neon-green: var(--neon-green);
+  --font-sans: var(--font-display), "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono-plex), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-display), "Avenir Next", "Segoe UI", sans-serif;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+}
+
+:root {
+  /* Light blush base with plum ink. */
+  --background: #f8eef7;
+  --card: #fffafe;
+  --foreground: #221531;
+  --silver: #6d5f7e;
+  /* The lead pair: neon magenta, its deep hover. */
+  --signal: #ff36a8;
+  --ember: #c40f86;
+  /* Dark plum blocks. */
+  --deep: #1d1230;
+  --smoke: #2b1c44;
+  --paper: #fff0fa;
+  /* The neon spread, with violet in its register. */
+  --neon-blue: #2546ff;
+  --neon-sky: #5c92ff;
+  --neon-cyan: #beeeff;
+  --neon-violet: #9b5cff;
+  --neon-pink: #ff98fb;
+  --neon-yellow: #ffce2e;
+  --neon-amber: #ffae00;
+  --neon-orange: #ff6200;
+  --neon-red: #ff0b00;
+  --neon-green: #1c7511;
+}
+
+@layer base {
+  html {
+    @apply font-sans;
+    background: var(--background);
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  ::selection {
+    background: var(--signal);
+    color: var(--deep);
+  }
+}
+
+/*
+ * One ambient loop. Entrances are never timed: the scroll driver in
+ * components/scroll-reveal.tsx scrubs them to the scroll position, and
+ * reduced motion or no JavaScript leaves every element fully visible.
+ * The gate answer fades once per interaction, not per scroll.
+ */
+@keyframes hearthlane-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes hearthlane-answer {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Interaction grammar: a button spring, an underline sweep, a hover lift
+ * with colored shadow, and a bordered cell grid, all in this project's
+ * own tokens. All of it stands down under reduced motion.
+ */
+
+/* The gate answer fades once per interaction, not per scroll. */
+.gate-answer {
+  animation: hearthlane-answer 200ms ease-out both;
+}
+
+/* Button spring: hover lifts and gives, active takes. */
+.btn-pop {
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.61, 1.41),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.btn-pop:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 10px 22px rgba(255, 54, 168, 0.28);
+}
+.btn-pop:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: none;
+}
+
+/* Underline sweep: the resting line exits right as the hover line enters
+   from the left, the delay making one continuous slide. */
+.sweep {
+  position: relative;
+}
+.sweep::before,
+.sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(var(--sweep-a, 1));
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.77, 0, 0.175, 1);
+}
+.sweep::before {
+  transform-origin: var(--sweep-a-origin, left center);
+  transition-delay: 0.1s;
+}
+.sweep::after {
+  transform: scaleX(var(--sweep-b, 0));
+  transform-origin: right center;
+}
+.sweep:hover::before {
+  --sweep-a: 0;
+  --sweep-a-origin: right center;
+  transition-delay: 0s;
+}
+.sweep:hover::after {
+  --sweep-b: 1;
+  transform-origin: left center;
+  transition-delay: 0.1s;
+}
+
+/* Fluid display type: linear interpolation from a 420px phone to a 1728px
+   desktop, capped at both ends. The denominator is the plain pixel span,
+   the form every engine accepts. */
+.display-hero {
+  font-size: calc(56px + (124 - 56) * (100vw - 420px) / 1308);
+}
+.display-section {
+  font-size: calc(34px + (52 - 34) * (100vw - 420px) / 1308);
+}
+.display-figure {
+  font-size: calc(56px + (96 - 56) * (100vw - 420px) / 1308);
+}
+@media (max-width: 420px) {
+  .display-hero {
+    font-size: 56px;
+  }
+  .display-section {
+    font-size: 34px;
+  }
+  .display-figure {
+    font-size: 56px;
+  }
+}
+
+/* The menu wipe: a clip-path reveal, opened by state. */
+.menu-wipe {
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  transition: clip-path 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+}
+.menu-wipe.open {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* The manifest strip's ambient spotlight: each robot takes a turn, the
+   cycle paused by hover, static under reduced motion. */
+@keyframes hearthlane-spot {
+  0%,
+  14%,
+  100% {
+    background-color: var(--card);
+    color: inherit;
+  }
+  4%,
+  10% {
+    background-color: var(--signal);
+    color: var(--deep);
+  }
+}
+.spot-cell {
+  animation: hearthlane-spot 8.4s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+.spot-cell:hover,
+.spot-cell:focus-within {
+  animation-play-state: paused;
+  background-color: var(--signal);
+  color: var(--deep);
+}
+
+/* The congestion map breathes column by column in bucket order, the way
+   the morning wave actually arrives: each four-tick column takes its turn,
+   one cycle across the whole horizon, static under reduced motion. */
+@keyframes hearthlane-column {
+  0%,
+  12.5%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  4%,
+  8% {
+    transform: scale(1.05);
+    opacity: 0.82;
+  }
+}
+.heat-cell {
+  animation: hearthlane-column 8.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-pop,
+  .sweep::before,
+  .sweep::after,
+  .menu-wipe,
+  .spot-cell,
+  .heat-cell {
+    transition: none;
+    animation: none;
+  }
+}
+
+
+.marquee-track {
+  animation: hearthlane-marquee 46s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .gate-answer {
+    animation: none;
+  }
+}
