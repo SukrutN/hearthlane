@@ -458,8 +458,9 @@ export default function WindowsPage() {
             </li>
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">The engine.</span> The figures come from{" "}
-              <span className="font-mono">hearthline-plan</span>, the sibling repository whose behavior test asserts
-              each one. Its CLI prints the same reading this page renders.
+              <span className="font-mono">hearthline-plan</span>, the planner at{" "}
+              <span className="font-mono">engine/</span> in this repository whose behavior test asserts each one. Its
+              CLI prints the same reading this page renders.
             </li>
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">Back up.</span>{" "}

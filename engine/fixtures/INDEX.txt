@@ -1,0 +1,20 @@
+casting-hall.json — the Ferro & Lume casting hall.
+
+A fictional worked example, invented for this planner and not a survey of any
+real building. 12 by 9 cells: three casting runs (North, Main, South) painted
+across the width, a dispatch apron along the south wall, and four aisles
+(West, Two, Three, Four) cut through the racks between them. First paint wins,
+so the runs own their rows and the aisles own the rack gaps.
+
+Six tasks ride the floor: two express runs, two standard runs, two bulk runs.
+Dues are tight on purpose — Tinder's run (T-03) is the one the prioritized
+rung cannot serve once the other traffic is booked, which is what the
+deadline-hit-rate curve and the degradation ladder report.
+
+Two window asks ride in the document (W-1 Kiln, W-2 Ash) so the release-gate
+walkthrough is data, not code.
+
+Provenance: hand-authored for the hearthline planner. Sources for the method
+itself are cited in the repository README (Sharon et al. 2015; openTCS and
+Open-RMF as industry analogs). The hall, the tasks, and every figure are
+fictional.
