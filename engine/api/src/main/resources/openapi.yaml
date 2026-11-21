@@ -104,6 +104,54 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
+  /v1/monitor:
+    post:
+      operationId: monitor
+      description: |
+        Watches the plan against the floor. Observations name where each AMR
+        actually stood at a tick; the monitor compares them with the plan and
+        names every disagreement (off-route, late, early, a collision risk),
+        then repairs: the joint tree re-solves from the observed positions
+        with the clock shifted, dues losing the spent ticks, and reports the
+        honest verdict on deadlines and makespan.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fixture:
+                  type: string
+                document:
+                  type: object
+                observations:
+                  type: array
+                  items:
+                    type: object
+                    required: [id, tick, at]
+                    properties:
+                      id:
+                        type: string
+                      tick:
+                        type: integer
+                      at:
+                        type: array
+                        items:
+                          type: integer
+      responses:
+        "200":
+          description: The reading and the repair with its verdict.
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: The observations are malformed, name an unknown AMR, stand on rack, or the repair cannot be served.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
   /v1/windows:
     post:
       operationId: windows

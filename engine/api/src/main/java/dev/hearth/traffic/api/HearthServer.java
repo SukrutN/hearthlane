@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hearth.traffic.Cell;
 import dev.hearth.traffic.ConflictSolver;
+import dev.hearth.traffic.DriftMonitor;
 import dev.hearth.traffic.GateDecision;
 import dev.hearth.traffic.PlanInput;
+import dev.hearth.traffic.PlanPath;
 import dev.hearth.traffic.PlanRejection;
 import dev.hearth.traffic.WindowRequest;
 import dev.hearth.traffic.WindowService;
@@ -21,6 +23,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +44,8 @@ public final class HearthServer {
     private static final Set<String> WINDOW_FIELDS = Set.of("fixture", "document", "request");
     private static final Set<String> REQUEST_FIELDS = Set.of("id", "amr", "klass", "origin", "destination",
             "earliest", "latest");
+    private static final Set<String> MONITOR_FIELDS = Set.of("fixture", "document", "observations");
+    private static final Set<String> OBSERVATION_FIELDS = Set.of("id", "tick", "at");
 
     private HearthServer() {}
 
@@ -120,6 +125,38 @@ public final class HearthServer {
                     "reasons", decision.reasons(),
                     "verdict", decision.verdict()));
         });
+        app.post("/v1/monitor", ctx -> {
+            JsonNode body = readBody(ctx, MONITOR_FIELDS);
+            PlanInput input = inputOf(body);
+            List<DriftMonitor.Observation> observations = observationsOf(body.get("observations"));
+            ConflictSolver.Solution served = new ConflictSolver(input, ConflictSolver.Mode.IMPROVED).solve();
+            if (!served.solved()) {
+                throw new PlanRejection(List.of(
+                        "The manifest itself cannot be served: " + served.reason()
+                                + " The monitor needs a served plan to watch."));
+            }
+            DriftMonitor.Reading reading = DriftMonitor.compare(served.paths(), input, observations);
+            DriftMonitor.Repair repair = DriftMonitor.repair(served.paths(), input, observations);
+            shell.planRun();
+            Map<String, Object> arrivals = new LinkedHashMap<>();
+            for (Map.Entry<String, PlanPath> entry : repair.paths().entrySet()) {
+                arrivals.put(entry.getKey(), entry.getValue().arrival());
+            }
+            ctx.json(Map.of(
+                    "floor", input.floorId(),
+                    "reading", Map.of(
+                            "observed", reading.observed(),
+                            "onPlan", reading.onPlan(),
+                            "violations", reading.violations(),
+                            "arrived", reading.arrivedIds()),
+                    "repair", Map.of(
+                            "servedSum", repair.servedSum(),
+                            "makespan", repair.makespan(),
+                            "oldMakespan", repair.oldMakespan(),
+                            "late", repair.lateIds(),
+                            "arrivals", arrivals,
+                            "verdict", repair.verdict())));
+        });
         return app;
     }
 
@@ -169,8 +206,49 @@ public final class HearthServer {
         return HearthJson.parse(node.get("document"));
     }
 
-    private static WindowRequest requestOf(JsonNode node, PlanInput input) {
-        if (node == null || !node.isObject()) {
+    /** Parses and validates the observation list: id, tick, and a [row, col] cell. */
+    private static List<DriftMonitor.Observation> observationsOf(JsonNode node) {
+        if (node == null || !node.isArray() || node.isEmpty()) {
+            throw new PlanRejection(List.of(
+                    "The monitor needs observations: a list of {id, tick, at: [row, col]}."));
+        }
+        List<DriftMonitor.Observation> observations = new ArrayList<>();
+        int index = 0;
+        for (JsonNode item : node) {
+            String path = "observations[" + index++ + "]";
+            if (!item.isObject()) {
+                throw new PlanRejection(List.of(path + " must be an object."));
+            }
+            List<String> reasons = new ArrayList<>();
+            Iterator<String> names = item.fieldNames();
+            while (names.hasNext()) {
+                String name = names.next();
+                if (!OBSERVATION_FIELDS.contains(name)) {
+                    reasons.add(path + " carries an unknown field " + name + ".");
+                }
+            }
+            if (!item.path("id").isTextual()) {
+                reasons.add(path + " needs a textual id.");
+            }
+            if (!item.path("tick").isInt() || item.path("tick").asInt() < 0) {
+                reasons.add(path + " needs a whole tick of zero or more.");
+            }
+            JsonNode at = item.path("at");
+            if (!at.isArray() || at.size() != 2 || !at.get(0).isInt() || !at.get(1).isInt()) {
+                reasons.add(path + " needs at as a [row, col] pair of integers.");
+            }
+            if (!reasons.isEmpty()) {
+                throw new PlanRejection(reasons);
+            }
+            observations.add(new DriftMonitor.Observation(
+                    item.path("id").asText(),
+                    item.path("tick").asInt(),
+                    new Cell(at.get(0).asInt(), at.get(1).asInt())));
+        }
+        return observations;
+    }
+
+    private static WindowRequest requestOf(JsonNode node, PlanInput input) {        if (node == null || !node.isObject()) {
             throw new PlanRejection(List.of("The windows ask needs a request object with id, amr, klass,"
                     + " origin, destination, earliest, and latest."));
         }

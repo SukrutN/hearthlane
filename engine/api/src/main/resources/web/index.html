@@ -284,6 +284,13 @@
 
   <div class="layout">
     <aside class="panel">
+      <h2>Watch the floor</h2>
+      <p class="hint">Observations name where each AMR actually stood. The monitor compares them with the plan, names every disagreement, and repairs from where the robots now stand.</p>
+      <label for="obsPaste">Observations (one per line: id, tick, row, col)</label>
+      <textarea id="obsPaste" spellcheck="false" style="min-height:70px" placeholder="T-03 8 3 5"></textarea>
+      <button class="btn" id="watchBtn" type="button">Watch the floor</button>
+      <div id="watchReport" hidden style="margin-top:12px"></div>
+
       <h2>Plan a floor</h2>
       <p class="hint">Choose a published floor and plan it. The ladder, the congestion map, and the gate journal will render on the right.</p>
       <label for="floor">Published floor</label>
@@ -877,6 +884,100 @@ document.getElementById("planBtn").addEventListener("click", function () {
 });
 document.getElementById("docBtn").addEventListener("click", planDocument);
 document.getElementById("gateBtn").addEventListener("click", askGate);
+
+// --- The drift monitor: observations in, reading and repair out. ---
+
+document.getElementById("watchBtn").addEventListener("click", watchFloor);
+
+function watchFloor() {
+  var text = document.getElementById("obsPaste").value.trim();
+  if (!text) {
+    showError("The observation area is empty.",
+      ["Paste one observation per line: the AMR id, the tick, and the row and column it stood on."]);
+    return;
+  }
+  if (!lastSource) {
+    showError("Plan a floor first.",
+      ["The monitor watches a served plan; run one, then watch the floor."]);
+    return;
+  }
+  var observations = [];
+  var lines = text.split(/\n+/);
+  for (var i = 0; i < lines.length; i++) {
+    var parts = lines[i].trim().split(/[\s,]+/);
+    if (parts.length < 4 || parts.length > 4) {
+      showError("Line " + (i + 1) + " needs exactly four fields: the AMR id, the tick, the row, and the column.",
+        ["The line reads: " + lines[i]]);
+      return;
+    }
+    var tick = Number(parts[1]);
+    var row = Number(parts[2]);
+    var col = Number(parts[3]);
+    if (!Number.isFinite(tick) || !Number.isFinite(row) || !Number.isFinite(col)) {
+      showError("Line " + (i + 1) + " carries a field that is not a number.",
+        ["The line reads: " + lines[i]]);
+      return;
+    }
+    observations.push({ id: parts[0], tick: tick, at: [row, col] });
+  }
+  var body = { observations: observations };
+  if (lastSource.fixture) body.fixture = lastSource.fixture;
+  if (lastSource.document) body.document = lastSource.document;
+  var button = document.getElementById("watchBtn");
+  clearError();
+  busy(button, true, "Watching...");
+  call("/v1/monitor", body).then(function (payload) {
+    try {
+      renderWatch(payload);
+    } catch (renderFailure) {
+      showError("The engine returned a reading this page could not display. The raw response is in the browser console.", []);
+      console.error(renderFailure, payload);
+    }
+  }).catch(function (state) {
+    reportProblem(state);
+  }).finally(function () {
+    busy(button, false, null);
+  });
+}
+
+function renderWatch(payload) {
+  var reading = payload.reading || {};
+  var repair = payload.repair || {};
+  var violationRows = (reading.violations || []).map(function (violation) {
+    return "<tr><td class='mono'>" + esc(violation.id) + "</td>" +
+      "<td><span class='chip chip--" + (violation.kind === "late" || violation.kind === "collision" ? "hesitate" : "armed") + "'>" + esc(violation.kind) + "</span></td>" +
+      "<td class='num'>" + esc(violation.tick) + "</td>" +
+      "<td>" + esc(violation.detail) + "</td></tr>";
+  }).join("");
+  var arrived = (reading.arrived || []).map(function (id) {
+    return "<span class='chip chip--accepted'>" + esc(id) + "</span>";
+  }).join(" ");
+  var late = (repair.late || []).map(function (id) {
+    return "<span class='chip chip--hesitate'>" + esc(id) + "</span>";
+  }).join(" ");
+  document.getElementById("watchReport").hidden = false;
+  document.getElementById("watchReport").innerHTML =
+    "<p class='hint' style='margin:0'><strong>" +
+    esc(reading.observed) + " observed · " + esc(reading.onPlan) + " on plan" +
+    ((reading.violations || []).length ? " · " + esc((reading.violations || []).length) + " violations" : " · the floor matches the plan") +
+    "</strong>" +
+    (arrived ? "<p class='hint' style='margin:4px 0 0'>arrived: " + arrived + "</p>" : "") +
+    "</p>" +
+    (violationRows
+      ? "<div class='table-scroll' style='margin-top:8px'><table><thead><tr><th>amr</th><th>kind</th><th class='num'>tick</th><th>the floor says</th></tr></thead><tbody>" + violationRows + "</tbody></table></div>"
+      : "") +
+    "<div class='cards' style='margin-top:12px'>" +
+    watchCard("Repair makespan", esc(repair.makespan), "was " + esc(repair.oldMakespan)) +
+    watchCard("Served sum", esc(repair.servedSum), "arrival ticks") +
+    "</div>" +
+    "<p class='hint' style='margin:8px 0 0'>" + esc(repair.verdict) +
+    (late ? " &nbsp; past due: " + late : "") + "</p>";
+  document.getElementById("watchReport").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function watchCard(key, value, sub) {
+  return "<div class='card'><div class='k'>" + esc(key) + "</div><div class='v'>" + value + "</div><div class='s'>" + esc(sub) + "</div></div>";
+}
 
 // --- The token slot: shown only when the engine asks for one. ---
 

@@ -227,6 +227,66 @@ class HearthServerTest {
     }
 
     @Test
+    void theMonitorReadsACleanFloorAndKeepsTheDeadlines() throws Exception {
+        // every AMR standing on its start at tick 0, which is exactly where
+        // the plan puts them: the floor matches, the repair holds
+        String observations = "["
+                + "{\"id\":\"T-01\",\"tick\":0,\"at\":[8,0]},"
+                + "{\"id\":\"T-02\",\"tick\":0,\"at\":[0,0]},"
+                + "{\"id\":\"T-03\",\"tick\":0,\"at\":[3,5]},"
+                + "{\"id\":\"T-04\",\"tick\":0,\"at\":[6,9]},"
+                + "{\"id\":\"T-05\",\"tick\":0,\"at\":[0,3]},"
+                + "{\"id\":\"T-06\",\"tick\":0,\"at\":[8,6]}"
+                + "]";
+
+        HttpResponse<String> response = send("POST", "/v1/monitor",
+                "{\"fixture\":\"casting-hall\",\"observations\":" + observations + "}");
+        assertEquals(200, response.statusCode());
+        JsonNode body = mapper.readTree(response.body());
+        assertEquals(6, body.get("reading").get("observed").asInt());
+        assertEquals(6, body.get("reading").get("onPlan").asInt());
+        assertEquals(0, body.get("reading").get("violations").size());
+        assertTrue(body.get("repair").get("verdict").asText().contains("keeps every deadline"));
+    }
+
+    @Test
+    void theMonitorNamesAHeldBackAmrAndTheRepairLosesItsDeadline() throws Exception {
+        // Tinder still standing on its start at tick 8: its due is 9
+        HttpResponse<String> response = send("POST", "/v1/monitor",
+                "{\"fixture\":\"casting-hall\",\"observations\":[{\"id\":\"T-03\",\"tick\":8,\"at\":[3,5]}]}");
+        assertEquals(200, response.statusCode());
+        JsonNode body = mapper.readTree(response.body());
+        assertEquals(1, body.get("reading").get("violations").size());
+        assertEquals("T-03", body.get("reading").get("violations").get(0).get("id").asText());
+        assertTrue(body.get("repair").get("late").toString().contains("T-03"));
+        assertTrue(body.get("repair").get("verdict").asText().contains("cannot keep every deadline"));
+    }
+
+    @Test
+    void theMonitorRefusesAnUnknownAmrInWords() throws Exception {
+        HttpResponse<String> response = send("POST", "/v1/monitor",
+                "{\"fixture\":\"casting-hall\",\"observations\":[{\"id\":\"T-99\",\"tick\":1,\"at\":[0,0]}]}");
+        assertEquals(400, response.statusCode());
+        assertTrue(mapper.readTree(response.body()).get("reasons").toString().contains("T-99"));
+    }
+
+    @Test
+    void theMonitorRefusesAnObservationOnRack() throws Exception {
+        HttpResponse<String> response = send("POST", "/v1/monitor",
+                "{\"fixture\":\"casting-hall\",\"observations\":[{\"id\":\"T-01\",\"tick\":1,\"at\":[1,1]}]}");
+        assertEquals(400, response.statusCode());
+        assertTrue(mapper.readTree(response.body()).get("reasons").toString().contains("not an open cell"));
+    }
+
+    @Test
+    void theMonitorRefusesMalformedObservations() throws Exception {
+        HttpResponse<String> response = send("POST", "/v1/monitor",
+                "{\"fixture\":\"casting-hall\",\"observations\":[{\"id\":\"T-01\",\"tick\":1}]}");
+        assertEquals(400, response.statusCode());
+        assertTrue(mapper.readTree(response.body()).get("reasons").toString().contains("at"));
+    }
+
+    @Test
     void anUnknownFixtureIsAProblemAndNotAReport() throws Exception {
         HttpResponse<String> response = send("POST", "/v1/plan", "{\"fixture\":\"no-such-floor\"}");
         assertEquals(400, response.statusCode());
