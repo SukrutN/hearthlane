@@ -75,6 +75,8 @@ public final class HearthServer {
         });
         app.get("/health", ctx -> ctx.json(Map.of("status", "up")));
         app.get("/v1/openapi.yaml", ctx -> ctx.contentType("application/yaml").result(openApi));
+        app.get("/v1/fixtures", ctx -> ctx.json(Map.of("floors", PlanLibrary.names())));
+        app.get("/", ctx -> ctx.contentType("text/html").result(loadWorkbench()));
         app.post("/v1/plan", ctx -> ctx.json(RunPlan.plan(inputOf(readBody(ctx, PLAN_FIELDS)))));
         app.post("/v1/windows", ctx -> {
             JsonNode body = readBody(ctx, WINDOW_FIELDS);
@@ -202,6 +204,18 @@ public final class HearthServer {
             return new String(input.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException exception) {
             throw new IllegalStateException("openapi.yaml could not be read", exception);
+        }
+    }
+
+    /** The single-file workbench this jar serves at "/", so the planner has a face of its own. */
+    private static String loadWorkbench() {
+        try (InputStream input = HearthServer.class.getResourceAsStream("/web/index.html")) {
+            if (input == null) {
+                throw new IllegalStateException("web/index.html is missing");
+            }
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException exception) {
+            throw new IllegalStateException("web/index.html could not be read", exception);
         }
     }
 }
