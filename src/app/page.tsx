@@ -8,25 +8,25 @@ const PRINCIPLES = [
     n: "01",
     code: "001",
     title: "Deadlines prune",
-    body: "Every task carries a due tick. A state that cannot land in time is thrown out before the tree ever splits on it, so the search spends its budget on plans that can still be kept.",
+    body: "Every task carries a due tick. A state that cannot land in time is discarded before the search tree splits on it, so the search only spends its budget on plans that can still be kept.",
   },
   {
     n: "02",
     code: "002",
     title: "Priority breaks ties",
-    body: "When two routes disagree, the higher class wins the first claim. Express outranks standard, standard outranks bulk, and the loser waits or walks around.",
+    body: "When two routes disagree, the higher class wins the first claim. Express outranks standard, standard outranks bulk, and the lower class waits or routes around.",
   },
   {
     n: "03",
     code: "003",
     title: "Density is measured",
-    body: "Where the conflict tree had to split, and how many sides had no cheaper way out, becomes a map: region by four-tick bucket. A gate can read it before releasing the next wave.",
+    body: "Where the conflict tree had to split, and how many sides had no cheaper alternative, becomes a map organized by region and four-tick bucket. A gate can read it before releasing the next wave.",
   },
   {
     n: "04",
     code: "004",
-    title: "Hesitate or fire",
-    body: "A window ask is answered by the plan itself: grant the departure if the origin region is clear, hold it with the reason journaled if the corridor carries conflict.",
+    title: "Grant or hold",
+    body: "A window request is answered by the plan itself: the departure is granted if the origin region is clear, or held with the reason recorded if the corridor carries conflict.",
   },
 ]
 
@@ -35,13 +35,13 @@ const NOTES = [
     n: "01",
     title: "Six AMRs, thirty ticks",
     meta: "The manifest",
-    body: "Two express runs, two standard runs, two bulk runs ride the casting hall. The dues are deliberately tight. Tinder must land by tick 9 or the floor owes an apology.",
+    body: "Two express runs, two standard runs, two bulk runs operate in the casting hall. The deadlines are deliberately tight. Tinder must land by tick 9.",
   },
   {
     n: "02",
     title: "The greedy order fails",
     meta: "The ladder's third rung",
-    body: "Prioritized planning books Ember first; its tie-break claims (3,0) at tick 5. Brann sweeps the Main Run and claims the same cell at tick 3. Tinder, due at 9, is pinned.",
+    body: "Prioritized planning books Ember first; its tie-break claims (3,0) at tick 5. Brann sweeps the Main Run and claims the same cell at tick 3. Tinder, due at 9, is blocked.",
   },
   {
     n: "03",

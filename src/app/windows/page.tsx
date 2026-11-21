@@ -222,7 +222,7 @@ export default function WindowsPage() {
             </div>
           </div>
           <p className="mt-6 max-w-2xl text-sm text-silver">
-            The tree splits almost entirely in ticks 4–7, the morning wave, and South Run carries the only cardinal sides (4 of its 8 splits had no cheaper way out). Dispatch Apron heats later, ticks 8–11, as the bulk runs return south. Aisle Three never splits; the reroute uses it as the way around.
+            The tree splits almost entirely in ticks 4–7, the morning wave. South Run carries the only cardinal sides (4 of its 8 splits had no cheaper alternative). Dispatch Apron sees more activity later, in ticks 8–11, as the bulk runs return south. Aisle Three never splits; the reroute uses it to get around congestion.
           </p>
         </section>
 
@@ -434,7 +434,7 @@ export default function WindowsPage() {
           </div>
           <p className="mt-8 max-w-2xl text-sm text-silver">
             Kiln&apos;s express run leaves the Dispatch Apron at tick 0 into a clear corridor, so it fires. Ash asks
-            to enter the Main Run at tick 4 — the exact bucket where the tree split three times — so it hesitates.
+            to enter the Main Run at tick 4, which is the exact bucket where the tree split three times, so it hesitates.
             The same plan that served six deadlines answers both.
           </p>
         </section>
@@ -453,7 +453,7 @@ export default function WindowsPage() {
               <span className="text-foreground">Industry analogs.</span> openTCS (Fraunhofer IML, MIT) splits
               transport tasks, vehicle state, and scheduling the way the window API mirrors its dispatch seam . 
               lighter and mathier. Open-RMF&apos;s rmf_traffic negotiates time-space schedules and rmf_task carries
-              task deadlines; the deadline curve here is the same argument made small.
+              task deadlines. The deadline curve here is the same argument at a smaller scale.
             </li>
             <li className="border-t border-foreground/10 py-5 text-sm text-silver">
               <span className="text-foreground">The fiction.</span> Ferro &amp; Lume is not a foundry. Ember, Brann,
