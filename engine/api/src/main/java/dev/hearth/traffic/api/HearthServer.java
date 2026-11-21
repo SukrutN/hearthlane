@@ -46,22 +46,32 @@ public final class HearthServer {
 
     public static void main(String[] args) {
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8093"));
-        create().start("0.0.0.0", port);
+        create(OpsShell.Options.fromEnv("HEARTH")).start("0.0.0.0", port);
     }
 
     public static Javalin create() {
+        return create(OpsShell.Options.defaults());
+    }
+
+    public static Javalin create(OpsShell.Options options) {
         String openApi = loadOpenApi();
-        Javalin app = Javalin.create(config -> config.showJavalinBanner = false);
-        app.before(ctx -> ctx.attribute("startedNanos", System.nanoTime()));
-        app.after(ctx -> {
-            Long started = ctx.attribute("startedNanos");
-            long elapsedMs = started == null ? 0 : (System.nanoTime() - started) / 1_000_000L;
-            log.info(
-                    Markers.append("method", ctx.method().name())
-                            .and(Markers.append("path", ctx.path()))
-                            .and(Markers.append("status", ctx.statusCode()))
-                            .and(Markers.append("elapsedMs", elapsedMs)),
-                    "request");
+        OpsShell shell = new OpsShell(options, "hearth");
+        Javalin app = Javalin.create(config -> {
+            config.showJavalinBanner = false;
+            // the same cap the gate announces, enforced by the server itself
+            // for bodies that lie about their length
+            config.http.maxRequestSize = options.maxBodyBytes();
+        });
+        app.before(ctx -> {
+            ctx.attribute("startedNanos", System.nanoTime());
+            shell.gate(ctx);
+        });
+        app.after(shell::observed);
+        app.exception(OpsShell.Refusal.class, (exception, ctx) -> {
+            if (exception.retryAfterSeconds > 0) {
+                ctx.header("Retry-After", String.valueOf(exception.retryAfterSeconds));
+            }
+            problem(ctx, exception.status, exception.type, exception.title, exception.detail, List.of());
         });
         app.exception(UnknownFixture.class, (exception, ctx) -> problem(
                 ctx, 400, "urn:hearth:unknown-fixture", "Unknown fixture", exception.getMessage(), List.of()));
@@ -74,10 +84,23 @@ public final class HearthServer {
                     "The manifest could not be read.", List.of());
         });
         app.get("/health", ctx -> ctx.json(Map.of("status", "up")));
+        app.get("/ready", ctx -> {
+            boolean ready = !PlanLibrary.names().isEmpty();
+            ctx.status(ready ? 200 : 503).json(Map.of(
+                    "status", ready ? "ready" : "not-ready",
+                    "floors", PlanLibrary.names().size()));
+        });
+        app.get("/metrics", ctx -> ctx
+                .contentType("text/plain; version=0.0.4; charset=utf-8")
+                .result(shell.render()));
         app.get("/v1/openapi.yaml", ctx -> ctx.contentType("application/yaml").result(openApi));
         app.get("/v1/fixtures", ctx -> ctx.json(Map.of("floors", PlanLibrary.names())));
         app.get("/", ctx -> ctx.contentType("text/html").result(loadWorkbench()));
-        app.post("/v1/plan", ctx -> ctx.json(RunPlan.plan(inputOf(readBody(ctx, PLAN_FIELDS)))));
+        app.post("/v1/plan", ctx -> {
+            var report = RunPlan.plan(inputOf(readBody(ctx, PLAN_FIELDS)));
+            shell.planRun();
+            ctx.json(report);
+        });
         app.post("/v1/windows", ctx -> {
             JsonNode body = readBody(ctx, WINDOW_FIELDS);
             PlanInput input = inputOf(body);
@@ -89,6 +112,7 @@ public final class HearthServer {
                                 + " The gate needs a served plan to answer a window."));
             }
             GateDecision decision = WindowService.gate(input, served.paths(), served.splits(), request);
+            shell.windowAsk();
             ctx.json(Map.of(
                     "floor", input.floorId(),
                     "request", request.id(),

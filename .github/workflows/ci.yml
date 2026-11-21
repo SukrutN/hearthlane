@@ -40,3 +40,12 @@ jobs:
 
       - name: Build (production, TypeScript included)
         run: npm run build
+
+  docker:
+    name: image build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the planner image
+        run: docker build -t hearth-api .

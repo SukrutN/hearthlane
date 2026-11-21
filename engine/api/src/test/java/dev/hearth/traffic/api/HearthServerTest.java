@@ -39,6 +39,10 @@ class HearthServerTest {
     }
 
     private HttpResponse<String> send(String method, String path, String body) throws Exception {
+        return send(base, method, path, body);
+    }
+
+    private HttpResponse<String> send(String base, String method, String path, String body) throws Exception {
         HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(base + path));
         switch (method) {
             case "GET" -> request.GET();
@@ -60,6 +64,87 @@ class HearthServerTest {
         assertTrue(spec.body().contains("/v1/plan"));
         assertTrue(spec.body().contains("/v1/windows"));
         assertTrue(spec.body().contains("/v1/fixtures"));
+    }
+
+    @Test
+    void metricsAreServedInPrometheusText() throws Exception {
+        send("GET", "/health", null);
+        HttpResponse<String> metrics = send("GET", "/metrics", null);
+        assertEquals(200, metrics.statusCode());
+        assertTrue(metrics.headers().firstValue("content-type").orElse("").contains("text/plain"));
+        String body = metrics.body();
+        assertTrue(body.contains("# TYPE hearth_http_requests_total counter"));
+        assertTrue(body.contains("hearth_http_requests_total{"));
+        assertTrue(body.contains("hearth_uptime_seconds"));
+    }
+
+    @Test
+    void readinessReportsThePublishedFloors() throws Exception {
+        HttpResponse<String> response = send("GET", "/ready", null);
+        assertEquals(200, response.statusCode());
+        JsonNode body = mapper.readTree(response.body());
+        assertEquals("ready", body.get("status").asText());
+        assertTrue(body.get("floors").asInt() > 0);
+    }
+
+    @Test
+    void aTokenLocksTheApiAndKeepsThePublicRoutesOpen() throws Exception {
+        Javalin tokened = HearthServer.create(new OpsShell.Options("sesame", 600, 1024 * 1024));
+        tokened.start(0);
+        String tokenBase = "http://127.0.0.1:" + tokened.port();
+        try {
+            HttpResponse<String> refused = send(tokenBase, "POST", "/v1/plan", "{\"fixture\":\"casting-hall\"}");
+            assertEquals(401, refused.statusCode());
+            assertTrue(refused.headers().firstValue("content-type").orElse("").contains("application/problem+json"));
+            assertTrue(mapper.readTree(refused.body()).get("title").asText().contains("token"));
+
+            HttpRequest allowed = HttpRequest.newBuilder(URI.create(tokenBase + "/v1/plan"))
+                    .header("authorization", "Bearer sesame")
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString("{\"fixture\":\"casting-hall\"}"))
+                    .build();
+            assertEquals(200, client.send(allowed, HttpResponse.BodyHandlers.ofString()).statusCode());
+
+            for (String open : java.util.List.of("/health", "/ready", "/metrics", "/")) {
+                HttpResponse<String> page = send(tokenBase, "GET", open, null);
+                assertEquals(200, page.statusCode(), open + " should stay open for probes and the workbench page");
+            }
+        } finally {
+            tokened.stop();
+        }
+    }
+
+    @Test
+    void theRateLimitRefusesWithRetryAfter() throws Exception {
+        Javalin limited = HearthServer.create(new OpsShell.Options(null, 3, 1024 * 1024));
+        limited.start(0);
+        String limitedBase = "http://127.0.0.1:" + limited.port();
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertEquals(200, send(limitedBase, "GET", "/v1/fixtures", null).statusCode());
+            }
+            HttpResponse<String> fourth = send(limitedBase, "GET", "/v1/fixtures", null);
+            assertEquals(429, fourth.statusCode());
+            assertTrue(Integer.parseInt(fourth.headers().firstValue("Retry-After").orElse("0")) > 0);
+            assertEquals("Too many requests", mapper.readTree(fourth.body()).get("title").asText());
+        } finally {
+            limited.stop();
+        }
+    }
+
+    @Test
+    void anOversizeBodyIsRefusedBeforeItIsRead() throws Exception {
+        Javalin capped = HearthServer.create(new OpsShell.Options(null, 600, 512));
+        capped.start(0);
+        String cappedBase = "http://127.0.0.1:" + capped.port();
+        try {
+            HttpResponse<String> response = send(cappedBase, "POST", "/v1/plan", "x".repeat(2048));
+            assertEquals(413, response.statusCode());
+            assertEquals("The request body is too large",
+                    mapper.readTree(response.body()).get("title").asText());
+        } finally {
+            capped.stop();
+        }
     }
 
     @Test

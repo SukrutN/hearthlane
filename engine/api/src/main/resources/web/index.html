@@ -55,6 +55,29 @@
   .dot.up { background: #2e7d43; }
   .dot.down { background: #b3261e; }
 
+  /* The token slot appears only when the engine refuses without one. */
+  .token-slot { display: flex; align-items: center; gap: 8px; }
+  .token-slot input {
+    width: 160px;
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: #fff;
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  .token-slot button {
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--ink);
+    color: var(--paper);
+    font: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+
   main { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
   .intro { max-width: 760px; margin: 0 0 28px; }
   .intro p { margin: 6px 0; font-size: 17px; }
@@ -246,6 +269,11 @@
     <span class="dot" id="healthDot"></span>
     <span id="healthText">checking the engine</span>
   </div>
+  <div class="token-slot" id="tokenSlot" hidden>
+    <label for="token" style="font-size:12px;color:var(--silver)">Engine token</label>
+    <input type="password" id="token" autocomplete="off" placeholder="paste the token">
+    <button type="button" id="tokenUse">Unlock</button>
+  </div>
 </header>
 
 <main>
@@ -394,23 +422,30 @@ function showError(title, reasons) {
 // Fetch wrapper: network failure marks the engine down, a problem response is
 // returned as an error, and anything that is not JSON fails loudly.
 function call(path, body) {
+  var headers = body ? { "content-type": "application/json" } : undefined;
+  var token = sessionStorage.getItem("hearth-token");
+  if (token) {
+    headers = headers || {};
+    headers.authorization = "Bearer " + token;
+  }
   return fetch(path, body ? {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: headers,
     body: JSON.stringify(body)
-  } : undefined).then(function (response) {
+  } : (headers ? { headers: headers } : undefined)).then(function (response) {
     setHealth(true, "engine reachable");
+    var retryAfter = response.headers.get("retry-after");
     var type = response.headers.get("content-type") || "";
     if (type.includes("application/json")) {
       return response.json().then(function (json) {
         if (!response.ok) {
-          throw { problem: json, status: response.status };
+          throw { problem: json, status: response.status, retryAfter: retryAfter };
         }
         return json;
       });
     }
     if (!response.ok) {
-      throw { problem: null, status: response.status };
+      throw { problem: null, status: response.status, retryAfter: retryAfter };
     }
     throw { problem: null, status: 0 };
   }).catch(function (error) {
@@ -423,6 +458,20 @@ function call(path, body) {
 }
 
 function reportProblem(state) {
+  if (state && state.status === 401) {
+    document.getElementById("tokenSlot").hidden = false;
+    document.getElementById("token").focus();
+    showError("The engine asks for a token.",
+      ["Paste the engine's token in the header above, then run the request again."]);
+    return;
+  }
+  if (state && state.status === 429 && state.retryAfter) {
+    var rateDetail = state.problem && state.problem.detail
+      ? state.problem.detail
+      : "The engine is limiting this client's requests.";
+    showError("Too many requests. " + rateDetail + " Try again in " + state.retryAfter + " seconds.", []);
+    return;
+  }
   if (state && state.problem && (state.problem.detail || state.problem.title)) {
     var detail = state.problem.detail || state.problem.title;
     // showError escapes once; passing raw text here keeps quotes readable.
@@ -790,7 +839,9 @@ function renderAsk(answer, request) {
 }
 
 function loadFixtures() {
-  fetch("/v1/fixtures").then(function (response) {
+  var token = sessionStorage.getItem("hearth-token");
+  var options = token ? { headers: { authorization: "Bearer " + token } } : undefined;
+  fetch("/v1/fixtures", options).then(function (response) {
     if (!response.ok) throw new Error("fixtures unavailable");
     return response.json();
   }).then(function (list) {
@@ -826,6 +877,21 @@ document.getElementById("planBtn").addEventListener("click", function () {
 });
 document.getElementById("docBtn").addEventListener("click", planDocument);
 document.getElementById("gateBtn").addEventListener("click", askGate);
+
+// --- The token slot: shown only when the engine asks for one. ---
+
+function useToken() {
+  var value = document.getElementById("token").value.trim();
+  if (!value) return;
+  sessionStorage.setItem("hearth-token", value);
+  document.getElementById("tokenSlot").hidden = true;
+  document.getElementById("token").value = "";
+  loadFixtures();
+}
+document.getElementById("tokenUse").addEventListener("click", useToken);
+document.getElementById("token").addEventListener("keydown", function (event) {
+  if (event.key === "Enter") useToken();
+});
 
 fetch("/health").then(function (response) {
   setHealth(response.ok, response.ok ? "engine reachable" : "engine unreachable");

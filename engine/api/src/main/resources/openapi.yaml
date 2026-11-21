@@ -34,6 +34,35 @@ paths:
             application/yaml:
               schema:
                 type: string
+  /ready:
+    get:
+      operationId: readiness
+      responses:
+        "200":
+          description: The published floors are loaded and the planner will answer.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, floors]
+                properties:
+                  status:
+                    type: string
+                    example: ready
+                  floors:
+                    type: integer
+        "503":
+          description: The fixture index is unreadable, so the planner is not ready to serve.
+  /metrics:
+    get:
+      operationId: metrics
+      responses:
+        "200":
+          description: The process's counters and gauges, in Prometheus text exposition format. The route stays open for the scraper.
+          content:
+            text/plain:
+              schema:
+                type: string
   /v1/fixtures:
     get:
       operationId: fixtures
