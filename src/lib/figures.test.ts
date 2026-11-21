@@ -32,7 +32,7 @@ describe("canonical figures", () => {
     assert.equal(greedy.solver, "prioritized")
     assert.equal(greedy.solved, false)
     assert.equal(greedy.sum, null, "an unsolved rung reports no sum")
-    assert.equal(greedy.gap, null, "no plan, no gap — the ladder is honest")
+    assert.equal(greedy.gap, null, "an unsolved rung reports no gap")
     assert.equal(greedy.expanded, 72)
     assert.ok(greedy.reason?.includes("Tinder"))
   })

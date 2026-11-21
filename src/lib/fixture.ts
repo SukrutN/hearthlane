@@ -1,5 +1,5 @@
 /**
- * The Ferro & Lume casting hall — read from the planner's canonical fixture,
+ * The Ferro & Lume casting hall, read from the planner's canonical fixture,
  * `engine/fixtures/casting-hall.json`, instead of a transcription. The site
  * never invents a figure: everything it renders is either this document or a
  * locked engine reading in `figures.ts`.

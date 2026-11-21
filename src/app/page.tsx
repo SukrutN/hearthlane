@@ -105,7 +105,7 @@ export default function HomePage() {
                 A WES should release robot work into a floor it has already read. Hearthlane plans the whole batch jointly, then answers window asks from the plan the floor will actually run.
               </p>
               <p className="mt-8 max-w-xl text-silver">
-                This is a planner, not a fleet system. It keeps a joint plan, reports the optimality gap, and measures
+                This is a planner rather than a fleet system. It keeps a joint plan, reports the optimality gap, and measures
                 congestion where the conflict tree had to split.
               </p>
             </div>

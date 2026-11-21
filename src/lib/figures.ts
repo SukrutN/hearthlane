@@ -173,7 +173,7 @@ export const JOURNAL: JournalRow[] = [
 export const HORIZON = 30
 export const SEED = 2027
 
-/** Buckets of four ticks across the horizon — the heatmap's columns. */
+/** Buckets of four ticks across the horizon; the heatmap's columns. */
 export const BUCKET = 4
 export const BUCKETS = Math.ceil(HORIZON / BUCKET)
 
